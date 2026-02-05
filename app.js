@@ -161,17 +161,30 @@ const UIManager = {
                 </div>
             </div>
 
-            <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Inversión Ads', cur.pauta, prev.pauta, '$', true)}
-                ${this.statCard('Leads Totales', cur.alcance, prev.alcance)}
-                ${this.statCard('Venta Bruta', cur.ventaTotal, prev.ventaTotal, '$')}
-                ${this.statCard('% Asistencia', cur.assistRate.toFixed(1), prev.assistRate.toFixed(1), '', false, '%')}
-            </div>
+            <div class="animate-fade-in">
+                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Marketing</h3>
+                <div class="dashboard-grid" style="margin-bottom: 2rem;">
+                    ${this.statCard('Alcance', cur.alcance, prev.alcance)}
+                    ${this.statCard('Impresiones', cur.impresiones, prev.impresiones)}
+                    ${this.statCard('Leads', cur.resultados, prev.resultados)}
+                    ${this.statCard('CPL', cur.cpl, prev.cpl, '$', true)}
+                    ${this.statCard('Ad Spend', cur.pauta, prev.pauta, '$', true)}
+                </div>
 
-            <div class="dashboard-grid animate-fade-in">
-                ${this.statCard('CPL Promedio', cur.cpl, prev.cpl, '$', true)}
-                ${this.statCard('Utilidad Real', cur.profit, prev.profit, '$')}
-                ${this.statCard('ROAS Total', cur.roas.toFixed(2), prev.roas.toFixed(2), '', false, 'x')}
+                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Operaciones</h3>
+                <div class="dashboard-grid" style="margin-bottom: 2rem;">
+                    ${this.statCard('Agendadas', cur.citasAgendadas, prev.citasAgendadas)}
+                    ${this.statCard('Atendidas', cur.citasAtendidas, prev.citasAtendidas)}
+                    ${this.statCard('% Asistencia', cur.assistRate.toFixed(1), prev.assistRate.toFixed(1), '', false, '%')}
+                </div>
+
+                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Finanzas</h3>
+                <div class="dashboard-grid">
+                    ${this.statCard('Venta Total', cur.ventaTotal, prev.ventaTotal, '$')}
+                    ${this.statCard('Utilidad Bruta', cur.profit, prev.profit, '$')}
+                    ${this.statCard('ROAS', cur.roas.toFixed(2), prev.roas.toFixed(2), '', false, 'x')}
+                    ${this.statCard('ROE (ROI)', (cur.roe * 100).toFixed(1), (prev.roe * 100).toFixed(1), '', false, '%')}
+                </div>
             </div>
         `;
     },
