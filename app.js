@@ -187,6 +187,7 @@ const UIManager = {
                     ${this.statCard('Agendadas', cur.citasAgendadas, prev.citasAgendadas)}
                     ${this.statCard('Atendidas', cur.citasAtendidas, prev.citasAtendidas)}
                     ${this.statCard('% Asistencia', cur.assistRate.toFixed(1), prev.assistRate.toFixed(1), '', false, '%')}
+                    ${cur.procedimientos > 0 ? this.statCard('Procedimientos', cur.procedimientos, prev.procedimientos || 0) : ''}
                 </div>
 
                 <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Finanzas</h3>
@@ -242,6 +243,8 @@ const UIManager = {
 
     renderOperaciones(el, cur, prev, metrics) {
         const hasProcedures = cur.operacion.procedimientos > 0;
+        const convRate = cur.operacion.citasAtendidas > 0 ? (cur.operacion.procedimientos / cur.operacion.citasAtendidas * 100).toFixed(1) : 0;
+
         el.innerHTML = `
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
                 ${this.statCard('Agendadas', cur.operacion.citasAgendadas, 0)}
@@ -249,17 +252,35 @@ const UIManager = {
                 ${this.statCard('% Asistencia', metrics.assistRate.toFixed(1), 0, '', false, '%')}
                 ${hasProcedures ? this.statCard('Procedimientos', cur.operacion.procedimientos, 0) : ''}
             </div>
-            <div class="card-premium animate-fade-in">
-                <h3 style="margin-bottom: 2rem; font-size: 1rem;">Flujo de Conversión Comercial</h3>
-                <div style="display:flex; justify-content: center; align-items: center; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem; gap: 3rem;">
-                    <div style="text-align:center;"><b>${cur.operacion.citasAgendadas}</b><br><small>Agendadas</small></div>
-                    <div style="font-size: 2rem; color: var(--text-muted);">→</div>
-                    <div style="text-align:center; color: #4338ca;"><b>${cur.operacion.citasAtendidas}</b><br><small>Atendidas</small></div>
-                    ${hasProcedures ? `
+
+            <div class="animate-fade-in" style="display: flex; flex-direction: column; gap: 2rem;">
+                <div class="card-premium">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Etapa 1: Gestión de Citas (Asistencia)</h3>
+                    <div style="display:flex; justify-content: center; align-items: center; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem; gap: 3rem;">
+                        <div style="text-align:center;"><b>${cur.operacion.citasAgendadas}</b><br><small>Agendadas</small></div>
+                        <div style="font-size: 2rem; color: var(--text-muted);">→</div>
+                        <div style="text-align:center; color: #4338ca;"><b>${cur.operacion.citasAtendidas}</b><br><small>Atendidas</small></div>
+                        <div style="padding: 1rem 2rem; background: rgba(99, 102, 241, 0.1); border-radius: 1rem;">
+                            <span style="font-size: 0.7rem; color: var(--text-muted); display: block; text-transform: uppercase;">Eficiencia de Agenda</span>
+                            <b style="font-size: 1.5rem; color: var(--primary);">${metrics.assistRate.toFixed(1)}%</b>
+                        </div>
+                    </div>
+                </div>
+
+                ${hasProcedures ? `
+                <div class="card-premium">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Etapa 2: Conversión Clínica (Cierre)</h3>
+                    <div style="display:flex; justify-content: center; align-items: center; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem; gap: 3rem;">
+                        <div style="text-align:center;"><b>${cur.operacion.citasAtendidas}</b><br><small>Atendidas</small></div>
                         <div style="font-size: 2rem; color: var(--text-muted);">→</div>
                         <div style="text-align:center; color: var(--accent-green);"><b>${cur.operacion.procedimientos}</b><br><small>Procedimientos</small></div>
-                    ` : ''}
+                        <div style="padding: 1rem 2rem; background: rgba(16, 185, 129, 0.1); border-radius: 1rem;">
+                            <span style="font-size: 0.7rem; color: var(--text-muted); display: block; text-transform: uppercase;">Eficiencia de Cierre</span>
+                            <b style="font-size: 1.5rem; color: var(--accent-green);">${convRate}%</b>
+                        </div>
+                    </div>
                 </div>
+                ` : ''}
             </div>
         `;
     },
