@@ -84,12 +84,18 @@ const FinanceManager = {
         const m = study.marketing;
         const v = study.ventas;
         const pauta = v.pauta || m.adSpend;
-        const totalMarketing = pauta + (v.inversion || clientConfig.inversion) + (v.leadConnector || clientConfig.lc);
-        const totalCosts = totalMarketing + (v.costos || clientConfig.costos);
+        const invQuick = v.inversion || clientConfig.inversion;
+        const lcCosts = v.leadConnector || clientConfig.lc;
+        const clientCosts = v.costos || clientConfig.costos;
+
+        const totalMarketing = pauta + invQuick + lcCosts;
+        const totalCosts = totalMarketing + clientCosts;
         const profit = v.ventaTotal - totalCosts;
 
         return {
-            pauta, totalMarketing, totalCosts, ventaTotal: v.ventaTotal, profit,
+            pauta, invQuick, lcCosts, clientCosts,
+            totalMarketing, totalCosts, ventaTotal: v.ventaTotal, profit,
+            profitMargin: v.ventaTotal > 0 ? (profit / v.ventaTotal * 100) : 0,
             roas: pauta > 0 ? (v.ventaTotal / pauta) : 0,
             roe: totalCosts > 0 ? (profit / totalCosts) : 0,
             assistRate: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
@@ -132,7 +138,7 @@ const UIManager = {
             case 'dashboard': this.renderDashboard(container, curMetrics, prevMetrics); break;
             case 'marketing': this.renderMarketing(container, curStudy, prevStudy, curMetrics); break;
             case 'operaciones': this.renderOperaciones(container, curStudy, prevStudy, curMetrics); break;
-            case 'ventas': this.renderVentas(container, curMetrics, curStudy, client.config); break;
+            case 'ventas': this.renderVentas(container, curMetrics, prevMetrics); break;
             case 'config': this.renderConfig(container, client, curStudy); break;
         }
         this.renderContextSelector();
@@ -285,19 +291,37 @@ const UIManager = {
         `;
     },
 
-    renderVentas(el, m, cur, config) {
+    renderVentas(el, m, pm) {
+        const cumulativeProfit = DataManager.getCumulativeProfit();
         el.innerHTML = `
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Venta Total', m.ventaTotal, 0, '$')}
-                ${this.statCard('Utilidad', m.profit, 0, '$')}
-                ${this.statCard('ROE (ROI)', (m.roe * 100).toFixed(1), 0, '', false, '%')}
-                ${this.statCard('Inversión Ads', m.pauta, 0, '$', true)}
+                ${this.statCard('Venta Total', m.ventaTotal, pm.ventaTotal, '$')}
+                ${this.statCard('Utilidad', m.profit, pm.profit, '$')}
+                ${this.statCard('Utilidad Acumulada', cumulativeProfit, 0, '$')}
+                ${this.statCard('Margen de Utilidad', m.profitMargin.toFixed(1), pm.profitMargin.toFixed(1), '', false, '%')}
             </div>
-            <div class="card-premium animate-fade-in">
-                <h3 style="margin-bottom: 1.5rem;">Desglose de Costos de Proyecto</h3>
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    ${this.renderCostLine('Personal & Op', cur.ventas.costos || config.costos, m.totalCosts, 'var(--text-muted)')}
-                    ${this.renderCostLine('Inversión Marketing', m.totalMarketing, m.totalCosts, 'var(--primary)')}
+
+            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="card-premium">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Desglose de Costos y Pauta</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                        <div class="trend-row"><span>Costos del Cliente (Op)</span><b>$${m.clientCosts.toLocaleString()}</b></div>
+                        <div class="trend-row"><span>Inversión Quick</span><b>$${m.invQuick.toLocaleString()}</b></div>
+                        <div class="trend-row"><span>Lead Connector</span><b>$${m.lcCosts.toLocaleString()}</b></div>
+                        <div class="trend-row" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);"><span>Pauta (Ad Spend)</span><b>$${m.pauta.toLocaleString()}</b></div>
+                    </div>
+                </div>
+
+                <div class="card-premium">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Eficiencia de Inversión</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                        ${this.renderCostLine('Costos Operativos', m.clientCosts, m.totalCosts, 'var(--text-muted)')}
+                        ${this.renderCostLine('Inversión Marketing', m.totalMarketing, m.totalCosts, 'var(--primary)')}
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between;">
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">ROI Real (ROE)</span>
+                            <b style="font-size: 1.25rem; color: var(--accent-green);">${(m.roe * 100).toFixed(1)}%</b>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
