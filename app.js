@@ -1,193 +1,105 @@
 /**
- * Execution Intelligence Suite v4.0 - "Flat Backend" Architecture
- * Focused on modularity, stability, and executive decision making.
+ * Execution Intelligence Suite v5.0 - "Consultancy" Architecture
+ * Multi-Client, Monthly Studies, and Manual Executive Data Entry.
  */
 
 // --- 1. CONFIGURATION & STATE ---
 const state = {
     currentSection: 'dashboard',
-    appId: '1412117657089726',
-    config: {
-        hasGA: false,
-        selectedAdAccount: ''
+    context: {
+        activeClient: 'Cliente Demo',
+        activePeriod: '2026-01' // YYYY-MM
     },
-    credentials: {
-        metaToken: '',
-        ghlToken: ''
-    },
-    adAccounts: [],
-    data: {
-        currentMonth: {
-            marketing: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
-            operacion: { citasAgendadas: 0, citasAtendidas: 0, procedimientos: 0 },
-            ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0 }
-        },
-        previousMonth: {
-            marketing: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
-            operacion: { citasAgendadas: 0, citasAtendidas: 0, procedimientos: 0 },
-            ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0 }
-        },
-        historical: { utilidadAcumulada: 0, roeAcumulado: 0 }
+    clients: {
+        'Cliente Demo': {
+            config: { costos: 32000, inversion: 6361, lc: 2568 },
+            estudios: {
+                '2026-01': {
+                    marketing: { impresiones: 182710, alcance: 94000, resultados: 344, adSpend: 8986 },
+                    operacion: { citasAgendadas: 80, citasAtendidas: 64, procedimientos: 12 },
+                    ventas: { ventaTotal: 145000, costos: 0, inversion: 0, leadConnector: 0, pauta: 0 }
+                }
+            }
+        }
     }
 };
 
 // --- 2. PERSISTENCE LAYER ---
 const PersistenceManager = {
-    keys: {
-        metaToken: 'ec_meta_token',
-        ghlToken: 'ec_ghl_token',
-        adAccount: 'ec_meta_ad_account',
-        hasGA: 'ec_has_ga',
-        costos: 'ec_manual_costos',
-        inversion: 'ec_manual_fee',
-        lc: 'ec_manual_lc',
-        utilidadHist: 'ec_utilidad_acum',
-        roeHist: 'ec_roe_acum'
-    },
+    key: 'ec_suite_data_v5',
     save() {
-        localStorage.setItem(this.keys.metaToken, state.credentials.metaToken);
-        localStorage.setItem(this.keys.ghlToken, state.credentials.ghlToken);
-        localStorage.setItem(this.keys.adAccount, state.config.selectedAdAccount);
-        localStorage.setItem(this.keys.hasGA, state.config.hasGA);
-        localStorage.setItem(this.keys.costos, state.data.currentMonth.ventas.costos);
-        localStorage.setItem(this.keys.inversion, state.data.currentMonth.ventas.inversion);
-        localStorage.setItem(this.keys.lc, state.data.currentMonth.ventas.leadConnector);
-        localStorage.setItem(this.keys.utilidadHist, state.data.historical.utilidadAcumulada);
-        localStorage.setItem(this.keys.roeHist, state.data.historical.roeAcumulado);
+        localStorage.setItem(this.key, JSON.stringify({
+            context: state.context,
+            clients: state.clients
+        }));
     },
     load() {
-        state.credentials.metaToken = localStorage.getItem(this.keys.metaToken) || '';
-        state.credentials.ghlToken = localStorage.getItem(this.keys.ghlToken) || '';
-        state.config.selectedAdAccount = localStorage.getItem(this.keys.adAccount) || '';
-        state.config.hasGA = localStorage.getItem(this.keys.hasGA) === 'true';
-        state.data.currentMonth.ventas.costos = parseFloat(localStorage.getItem(this.keys.costos)) || 0;
-        state.data.currentMonth.ventas.inversion = parseFloat(localStorage.getItem(this.keys.inversion)) || 0;
-        state.data.currentMonth.ventas.leadConnector = parseFloat(localStorage.getItem(this.keys.lc)) || 0;
-        state.data.historical.utilidadAcumulada = parseFloat(localStorage.getItem(this.keys.utilidadHist)) || 0;
-        state.data.historical.roeAcumulado = parseFloat(localStorage.getItem(this.keys.roeHist)) || 0;
+        const raw = localStorage.getItem(this.key);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            state.context = parsed.context;
+            state.clients = parsed.clients;
+        }
     }
 };
 
-// --- 3. BUSINESS LOGIC (FINANCIAL & DATA ENGINE) ---
-const FinanceManager = {
-    calculate(monthData) {
-        const m = monthData.marketing;
-        const v = monthData.ventas;
-        const pauta = v.pauta > 0 ? v.pauta : m.adSpend;
-        const inversionMarketing = pauta + v.inversion + v.leadConnector;
-        const gastosTotales = inversionMarketing + v.costos;
-        const utilidad = v.ventaTotal - gastosTotales;
-        const roe = gastosTotales > 0 ? (utilidad / gastosTotales) : 0;
-        const roas = pauta > 0 ? (v.ventaTotal / pauta) : 0;
-
-        if (utilidad > state.data.historical.utilidadAcumulada) {
-            state.data.historical.utilidadAcumulada = utilidad;
-            state.data.historical.roeAcumulado = roe;
-            PersistenceManager.save();
+// --- 3. DATA ENGINE (CONTEXT & COMPARISON) ---
+const DataManager = {
+    getClient() { return state.clients[state.context.activeClient]; },
+    getStudy(period = state.context.activePeriod) {
+        const c = this.getClient();
+        if (!c.estudios[period]) {
+            // New study template
+            c.estudios[period] = {
+                marketing: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
+                operacion: { citasAgendadas: 0, citasAtendidas: 0, procedimientos: 0 },
+                ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0 }
+            };
         }
+        return c.estudios[period];
+    },
+    getPreviousPeriod(current) {
+        let [y, m] = current.split('-').map(Number);
+        m--; if (m === 0) { m = 12; y--; }
+        return `${y}-${String(m).padStart(2, '0')}`;
+    },
+    getComparisonStudy() {
+        const prevPeriod = this.getPreviousPeriod(state.context.activePeriod);
+        return this.getClient().estudios[prevPeriod] || null;
+    }
+};
+
+// --- 4. BUSINESS LOGIC (FINANCIAL ENGINE) ---
+const FinanceManager = {
+    calculate(study, clientConfig) {
+        const m = study.marketing;
+        const v = study.ventas;
+
+        // Use manual override in study if present, otherwise use client defaults
+        const pauta = v.pauta || m.adSpend;
+        const invKWIQ = v.inversion || clientConfig.inversion;
+        const lc = v.leadConnector || clientConfig.lc;
+        const opCosts = v.costos || clientConfig.costos;
+
+        const inversionTotal = pauta + invKWIQ + lc;
+        const gastosTotales = inversionTotal + opCosts;
+        const utilidad = v.ventaTotal - gastosTotales;
 
         return {
-            pauta, inversionMarketing, gastosTotales, ventaTotal: v.ventaTotal, utilidad,
-            roas, roe,
-            tasaAsistencia: monthData.operacion.citasAgendadas > 0 ? (monthData.operacion.citasAtendidas / monthData.operacion.citasAgendadas * 100) : 0,
-            cpl: m.resultados > 0 ? (pauta / m.resultados) : 0
+            pauta, invKWIQ, lc, opCosts,
+            inversionTotal, gastosTotales, ventaTotal: v.ventaTotal, utilidad,
+            roas: pauta > 0 ? (v.ventaTotal / pauta) : 0,
+            roe: gastosTotales > 0 ? (utilidad / gastosTotales) : 0,
+            tasaAsistencia: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
+            cpl: m.resultados > 0 ? (pauta / m.resultados) : 0,
+            // Raw metrics for dashboard
+            alcance: m.alcance,
+            impresiones: m.impresiones,
+            resultados: m.resultados,
+            citasAgendadas: study.operacion.citasAgendadas,
+            citasAtendidas: study.operacion.citasAtendidas,
+            procedimientos: study.operacion.procedimientos
         };
-    },
-    getInsights(cur) {
-        let summary = "Rentabilidad proyectada en niveles corporativos.";
-        const margin = cur.ventaTotal > 0 ? (cur.utilidad / cur.ventaTotal) * 100 : 0;
-        if (cur.roe > 3) summary = "Rendimiento Excepcional: Momento de escala agresiva.";
-        else if (cur.roe > 1.5) summary = "Sólida Eficiencia: El sistema de ventas es altamente rentable.";
-        else if (margin < 15) summary = "Optimización Necesaria: El margen de utilidad es estrecho.";
-        return { summary };
-    }
-};
-
-const DataSyncManager = {
-    extractNumbers(text) {
-        const regex = /([$]?)\s*([\d,.]+)(%?)/g;
-        const results = [];
-        let match;
-        while ((match = regex.exec(text)) !== null) {
-            let raw = match[2];
-            let clean = raw;
-            if ((raw.match(/[.,]/g) || []).length > 1) clean = raw.replace(/[.,](?=\d{3})/g, '');
-            if (/[,.]\d{2}$/.test(clean)) clean = clean.replace(',', '.');
-            else clean = clean.replace(/[,.]/g, '');
-            let val = parseFloat(clean);
-            if (!isNaN(val)) results.push({ value: val, isPercentage: match[3] === '%' || (val > 0 && val < 200 && raw.includes('.')) });
-        }
-        return results;
-    },
-    mapMetrics(dataObjects, verbose = false, rawText = '') {
-        const m = state.data.currentMonth.marketing;
-        const o = state.data.currentMonth.operacion;
-        const v = state.data.currentMonth.ventas;
-        const numbers = dataObjects.map(d => d.value);
-        if (numbers.length === 0) return;
-
-        const text = rawText.toLowerCase();
-        const isMarketingContext = text.includes('alcance') || text.includes('impresiones') || text.includes('resultados') || text.includes('spend');
-        const isFinanceContext = text.includes('venta') || text.includes('costos') || text.includes('utilidad') || text.includes('kwiq');
-        const isFinance = isFinanceContext || (!isMarketingContext && Math.max(...numbers) > 50000);
-
-        if (isFinance) {
-            const sorted = [...dataObjects].filter(d => !d.isPercentage).sort((a, b) => b.value - a.value);
-            v.ventaTotal = sorted[0]?.value || 0;
-            const potentialCosts = dataObjects.find(d => d.value > v.ventaTotal * 0.4 && d.value < v.ventaTotal * 0.6);
-            if (potentialCosts) v.costos = potentialCosts.value;
-            const midValues = dataObjects.filter(d => d.value > 1000 && d.value < 10000 && !d.isPercentage);
-            if (midValues.length >= 2) { v.pauta = midValues[0].value; v.inversion = midValues[1].value; }
-            if (verbose) alert(`Finanzas Sincronizadas.`);
-        } else {
-            m.impresiones = numbers[0] || 0; m.alcance = numbers[1] || 0; m.resultados = numbers[2] || 0;
-            const spends = numbers.filter(n => n > 1000 && n < 20000);
-            m.adSpend = spends[spends.length - 1] || numbers[4] || 0;
-            let opsFound = dataObjects.slice(5).filter(d => !d.isPercentage).map(d => Math.round(d.value));
-            o.citasAgendadas = opsFound[0] || 0; o.citasAtendidas = opsFound[1] || 0;
-            if (o.citasAgendadas === 80 && o.citasAtendidas === 0) o.citasAtendidas = 64; // User hack
-            if (verbose) alert(`Marketing Sincronizado.`);
-        }
-        UIManager.showSection(state.currentSection);
-    }
-};
-
-// --- 4. API SERVICES ---
-const MetaService = {
-    init() { window.fbAsyncInit = () => FB.init({ appId: state.appId, cookie: true, xfbml: true, version: 'v18.0' }); },
-    login() {
-        FB.login(r => {
-            if (r.authResponse) {
-                state.credentials.metaToken = r.authResponse.accessToken;
-                PersistenceManager.save();
-                this.fetchAccounts();
-            }
-        }, { scope: 'ads_read,read_insights' });
-    },
-    async fetchAccounts() {
-        if (!state.credentials.metaToken) return;
-        try {
-            const r = await fetch(`https://graph.facebook.com/v18.0/me/adaccounts?fields=name,account_id&access_token=${state.credentials.metaToken}`);
-            const res = await r.json();
-            if (res.data) { state.adAccounts = res.data; UIManager.updateIfSection('config'); }
-        } catch (e) { console.error(e); }
-    },
-    async fetchInsights() {
-        const id = state.config.selectedAdAccount.startsWith('act_') ? state.config.selectedAdAccount : `act_${state.config.selectedAdAccount}`;
-        if (!state.credentials.metaToken || !id) return;
-        try {
-            const r = await fetch(`https://graph.facebook.com/v18.0/${id}/insights?date_preset=this_month&fields=spend,impressions,reach,actions&access_token=${state.credentials.metaToken}`);
-            const res = await r.json();
-            if (res.data && res.data[0]) {
-                const d = res.data[0];
-                const m = state.data.currentMonth.marketing;
-                m.adSpend = parseFloat(d.spend || 0); m.impresiones = parseInt(d.impressions || 0);
-                m.alcance = parseInt(d.reach || 0);
-                let ls = 0; if (d.actions) { const a = d.actions.find(x => ['lead', 'offsite_conversion.fb_pixel_lead', 'onsite_conversion.lead'].includes(x.action_type)); ls = a ? parseInt(a.value) : 0; }
-                m.resultados = ls;
-                UIManager.showSection(state.currentSection);
-            }
-        } catch (e) { console.error(e); }
     }
 };
 
@@ -199,120 +111,259 @@ const UIManager = {
         const nav = Array.from(document.querySelectorAll('.nav-item')).find(i => i.getAttribute('onclick')?.includes(id));
         if (nav) nav.classList.add('active');
 
-        const cur = FinanceManager.calculate(state.data.currentMonth);
-        const prev = FinanceManager.calculate(state.data.previousMonth);
+        const client = DataManager.getClient();
+        const curStudy = DataManager.getStudy();
+        const prevStudy = DataManager.getComparisonStudy();
 
+        const curMetrics = FinanceManager.calculate(curStudy, client.config);
+        const prevMetrics = prevStudy ? FinanceManager.calculate(prevStudy, client.config) : curMetrics;
+
+        // Update header info
         const title = document.getElementById('view-title');
         const subtitle = document.getElementById('view-subtitle');
+        title.innerText = this.getSectionTitle(id);
+        subtitle.innerText = `${state.context.activeClient} • Periodo: ${state.context.activePeriod}`;
 
         switch (id) {
-            case 'dashboard': title.innerText = 'Dashboard Ejecutivo'; subtitle.innerText = 'Vista Estratégica'; this.renderDashboard(cur, prev); break;
-            case 'marketing': title.innerText = 'Marketing'; subtitle.innerText = 'Ads Data'; this.renderMarketing(cur, prev); break;
-            case 'operaciones': title.innerText = 'Operaciones'; subtitle.innerText = 'CRM Business'; this.renderOperaciones(cur, prev); break;
-            case 'ventas': title.innerText = 'Finanzas'; subtitle.innerText = 'Revenue & ROI'; this.renderVentas(cur, prev); break;
-            case 'config': title.innerText = 'Configuración'; subtitle.innerText = 'Conexiones v4.0'; this.renderConfig(); break;
+            case 'dashboard': this.renderDashboard(curMetrics, prevMetrics); break;
+            case 'marketing': this.renderMarketing(curStudy, prevStudy); break;
+            case 'operaciones': this.renderOperaciones(curStudy, prevStudy); break;
+            case 'ventas': this.renderVentas(curMetrics, curStudy, client.config); break;
+            case 'config': this.renderConfig(client); break;
         }
+
+        this.renderContextSelector(); // Add selectors to header if not present
     },
-    updateIfSection(id) { if (state.currentSection === id) this.showSection(id); },
+
+    getSectionTitle(id) {
+        const m = { dashboard: 'Dashboard Ejecutivo', marketing: 'Marketing', operaciones: 'Operaciones CRM', ventas: 'Finanzas & ROI', config: 'Consultoría Config' };
+        return m[id] || 'Suite';
+    },
+
+    renderContextSelector() {
+        const header = document.querySelector('.header-actions');
+        if (!header) return;
+
+        let clientOptions = Object.keys(state.clients).map(c => `<option value="${c}" ${c === state.context.activeClient ? 'selected' : ''}>${c}</option>`).join('');
+
+        header.innerHTML = `
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+                <select onchange="App.setClient(this.value)" class="premium-input" style="padding:0.4rem 0.75rem; width:150px; font-size:0.75rem;">
+                    ${clientOptions}
+                    <option value="+ NEW">+ Nuevo Cliente</option>
+                </select>
+                <input type="month" value="${state.context.activePeriod}" onchange="App.setPeriod(this.value)" class="premium-input" style="padding:0.4rem 0.75rem; width:140px; font-size:0.75rem;">
+            </div>
+        `;
+    },
 
     renderDashboard(cur, prev) {
         const margin = cur.ventaTotal > 0 ? ((cur.utilidad / cur.ventaTotal) * 100).toFixed(1) : 0;
         document.getElementById('content-area').innerHTML = `
-            <div class="animate-fade-in" style="margin-bottom: 2.5rem;">
-                <div class="card-premium" style="background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%); color: white; padding: 2.5rem;">
-                    <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">Resumen Ejecutivo</h2>
-                    <p style="opacity: 0.9;">Tu rentabilidad actual es del <b>${margin}%</b>. Utilidad Neta: <b>$${cur.utilidad.toLocaleString()}</b></p>
+            <div class="card-premium animate-fade-in" style="background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%); color: white; padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem;">Execution Compass</h2>
+                    <p style="opacity: 0.9;">Utilidad Neta: <b>$${cur.utilidad.toLocaleString()}</b> | Margen: <b>${margin}%</b></p>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase;">ROE Histórico</span>
+                    <div style="font-size: 1.5rem; font-weight: 800;">${(cur.roe * 100).toFixed(1)}%</div>
                 </div>
             </div>
-            <div class="dashboard-grid animate-fade-in">
-                ${this.statCard('Inversión Marketing', cur.adSpend, prev.adSpend, '$', true)}
-                ${this.statCard('Venta Total', cur.ventaTotal, prev.ventaTotal, '$')}
-                ${this.statCard('ROE (Rentabilidad)', parseFloat((cur.roe * 100).toFixed(1)), 0, '', false, '%')}
-                ${this.statCard('ROAS (Eficiencia)', parseFloat(cur.roas.toFixed(2)), 0, '', false, 'x')}
+
+            <div class="animate-fade-in">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Marketing de Resultados</h3>
+                <div class="dashboard-grid" style="margin-bottom: 2.5rem;">
+                    ${this.statCard('Inversión Ads', cur.pauta, prev.pauta, '$', true)}
+                    ${this.statCard('Alcance', cur.alcance, prev.alcance)}
+                    ${this.statCard('Impresiones', cur.impresiones, prev.impresiones)}
+                    ${this.statCard('Leads (Resultados)', cur.resultados, prev.resultados)}
+                    ${this.statCard('Costo por Lead', cur.cpl, prev.cpl, '$', true)}
+                </div>
+
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Operaciones & Conversión</h3>
+                <div class="dashboard-grid" style="margin-bottom: 2.5rem;">
+                    ${this.statCard('Citas Agendadas', cur.citasAgendadas, prev.citasAgendadas)}
+                    ${this.statCard('Citas Atendidas', cur.citasAtendidas, prev.citasAtendidas)}
+                    ${this.statCard('% Asistencia', parseFloat(cur.tasaAsistencia.toFixed(1)), parseFloat(prev.tasaAsistencia.toFixed(1)), '', false, '%')}
+                    ${this.statCard('Procedimientos', cur.procedimientos, prev.procedimientos)}
+                </div>
+
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Revenue & Rentabilidad</h3>
+                <div class="dashboard-grid" style="margin-bottom: 2.5rem;">
+                    ${this.statCard('Venta Total', cur.ventaTotal, prev.ventaTotal, '$')}
+                    ${this.statCard('Utilidad Neta', cur.utilidad, prev.utilidad, '$')}
+                    ${this.statCard('ROAS', parseFloat(cur.roas.toFixed(2)), parseFloat(prev.roas.toFixed(2)), '', false, 'x')}
+                    ${this.statCard('ROE (ROI)', parseFloat((cur.roe * 100).toFixed(1)), parseFloat((prev.roe * 100).toFixed(1)), '', false, '%')}
+                </div>
             </div>
         `;
     },
 
     renderMarketing(cur, prev) {
-        const m = state.data.currentMonth.marketing;
-        const o = state.data.currentMonth.operacion;
-        document.getElementById('content-area').innerHTML = `
-            <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Inversión (Spend)', m.adSpend, 0, '$', true)}
-                ${this.statCard('Leads Generados', m.resultados, 0)}
-                ${this.statCard('CPL', cur.cpl, 0, '$', true)}
-            </div>
-            <div class="card animate-fade-in" style="padding: 2.5rem;">
-                <h3 style="margin-bottom: 1.5rem;">Visualización de Embudo</h3>
-                <div style="font-size: 1.1rem; color: var(--text-muted);">${m.resultados} Leads → ${o.citasAgendadas} Citas (${cur.tasaAsistencia.toFixed(1)}% conversión)</div>
-            </div>
-        `;
-    },
-
-    renderOperaciones(cur) {
-        const o = state.data.currentMonth.operacion;
-        document.getElementById('content-area').innerHTML = `
-            <div class="dashboard-grid animate-fade-in">
-                ${this.statCard('Citas Agendadas', o.citasAgendadas, 0)}
-                ${this.statCard('Citas Atendidas', o.citasAtendidas, 0)}
-                ${this.statCard('% Asistencia', parseFloat(cur.tasaAsistencia.toFixed(1)), 0, '', false, '%')}
-                ${this.statCard('Procedimientos', o.procedimientos, 0)}
-            </div>
-        `;
-    },
-
-    renderVentas(cur, prev) {
-        const v = state.data.currentMonth.ventas;
-        const h = state.data.historical;
-        const ins = FinanceManager.getInsights(cur);
-        document.getElementById('content-area').innerHTML = `
-            <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2.5rem;">
-                ${this.statCard('Venta Total', cur.ventaTotal, 0, '$')}
-                ${this.statCard('Utilidad Neta', cur.utilidad, 0, '$')}
-                ${this.statCard('ROE (ROI Total)', parseFloat((cur.roe * 100).toFixed(1)), 0, '', false, '%')}
-                ${this.statCard('ROAS Especial', parseFloat(cur.roas.toFixed(2)), 0, '', false, 'x')}
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;" class="animate-fade-in">
-                <div class="card-premium">
-                    <h3 style="margin-bottom: 1.5rem;">Análisis Proyectado</h3>
-                    <div style="background: rgba(16,185,129,0.05); padding: 1rem; border-radius: 0.75rem;">${ins.summary}</div>
-                </div>
-                <div class="card">
-                    <h3 style="margin-bottom: 1rem;">Detalle de Gastos</h3>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
-                        <div style="display:flex; justify-content:space-between;"><span>Operación</span><b>$${v.costos.toLocaleString()}</b></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Inversión KWIQ</span><b>$${v.inversion.toLocaleString()}</b></div>
-                        <div style="display:flex; justify-content:space-between;"><span>LeadConnector</span><b>$${v.leadConnector.toLocaleString()}</b></div>
-                        <hr style="opacity:0.1">
-                        <div style="display:flex; justify-content:space-between;"><span>Utilidad Acumulada</span><b style="color:var(--primary)">$${h.utilidadAcumulada.toLocaleString()}</b></div>
-                    </div>
-                </div>
-            </div>
-        `;
-    },
-
-    renderConfig() {
         document.getElementById('content-area').innerHTML = `
             <div class="config-grid animate-fade-in">
                 <div class="card-premium">
-                    <div class="section-header"><ion-icon name="rocket-outline"></ion-icon><h3>Identidad Financiera</h3></div>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Costos fijos para el cálculo del ROI.</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="input-group"><label>Costos Operativos ($)</label><input type="number" id="m-costos" class="premium-input" value="${state.data.currentMonth.ventas.costos}"></div>
-                        <div class="input-group"><label>Inversión KWIQ ($)</label><input type="number" id="m-fee" class="premium-input" value="${state.data.currentMonth.ventas.inversion}"></div>
+                    <div class="section-header"><h3>Carga Manual: Canales</h3></div>
+                    <div class="input-group"><label>Inversión Publicitaria ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${cur.marketing.adSpend}"></div>
+                    <div class="input-group"><label>Resultados (Leads)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${cur.marketing.resultados}"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+                        <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${cur.marketing.alcance}"></div>
+                        <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${cur.marketing.impresiones}"></div>
                     </div>
-                    <div class="input-group" style="margin-top: 1rem;"><label>LeadConnector ($)</label><input type="number" id="m-lc" class="premium-input" value="${state.data.currentMonth.ventas.leadConnector}"></div>
-                    <button onclick="App.saveFinance()" class="btn-premium" style="margin-top: 1.5rem;">Guardar Cambios</button>
                 </div>
-                <div class="card-premium" style="border-top: 4px solid #1877F2;">
-                    <div class="section-header"><ion-icon name="logo-facebook" style="color: #1877F2;"></ion-icon><h3>Vision AI: Meta Analytics</h3></div>
-                    <div class="ocr-zone" onclick="document.getElementById('f-upload').click()">
-                        <ion-icon name="scan-outline"></ion-icon>
-                        <p>Cargar Captura de Meta Ads</p>
-                        <input type="file" id="f-upload" accept="image/*" onchange="App.handleOCR(event)" style="display:none">
+                <div class="card-premium">
+                    <div class="section-header"><h3>Soportes & Vision AI</h3></div>
+            <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
+                ${this.statCard('Alcance Total', cur.alcance, prev.alcance)}
+                ${this.statCard('Impresiones', cur.impresiones, prev.impresiones)}
+                ${this.statCard('Leads (Resultados)', cur.resultados, prev.resultados)}
+                ${this.statCard('Inversión Publicitaria', cur.pauta, prev.pauta, '$', true)}
+            </div>
+
+            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="card-premium">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Rendimiento de Visibilidad</h3>
+                    <div style="height: 200px; display: flex; align-items: flex-end; gap: 1rem; padding-top: 1rem;">
+                        <div style="flex: 1; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
+                            <div style="width: 100%; background: var(--primary); height: 75%; border-radius: 0.5rem 0.5rem 0 0; opacity: 0.8;"></div>
+                            <span style="font-size: 0.7rem; margin-top: 0.5rem; color: var(--text-muted);">Alcance</span>
+                        </div>
+                        <div style="flex: 1; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
+                            <div style="width: 100%; background: #4338ca; height: 100%; border-radius: 0.5rem 0.5rem 0 0;"></div>
+                            <span style="font-size: 0.7rem; margin-top: 0.5rem; color: var(--text-muted);">Impresiones</span>
+                        </div>
                     </div>
-                    <textarea id="m-manual" class="premium-input" placeholder="Pega datos directos aquí..." style="height: 60px; margin-top: 1rem;"></textarea>
-                    <button onclick="App.processManual()" class="btn-secondary" style="margin-top: 0.5rem;">Procesar Manual</button>
+                </div>
+                <div class="card-premium">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Eficiencia de Conversión</h3>
+                    <div style="padding: 1rem; background: rgba(16,185,129,0.05); border-radius: 0.75rem;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Costo por Lead (CPL)</span>
+                            <b style="color: var(--primary);">$${cur.cpl.toFixed(2)}</b>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden;">
+                            <div style="width: ${Math.min((cur.cpl / 50) * 100, 100)}%; height: 100%; background: var(--primary);"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(67, 56, 202, 0.05); border-radius: 0.75rem;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">ROAS de Inversión</span>
+                            <b style="color: #4338ca;">${cur.roas.toFixed(2)}x</b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderOperaciones(cur, prev) {
+        document.getElementById('content-area').innerHTML = `
+            <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
+                ${this.statCard('Citas Agendadas', cur.citasAgendadas, prev.citasAgendadas)}
+                ${this.statCard('Citas Atendidas', cur.citasAtendidas, prev.citasAtendidas)}
+                ${this.statCard('% Asistencia', parseFloat(cur.tasaAsistencia.toFixed(1)), parseFloat(prev.tasaAsistencia.toFixed(1)), '', false, '%')}
+                ${this.statCard('Procedimientos', cur.procedimientos, prev.procedimientos)}
+            </div>
+            
+            <div class="card-premium animate-fade-in">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Eficiencia del Embudo Comercial</h3>
+                <div style="display: flex; align-items: center; gap: 2rem;">
+                    <div style="flex: 1; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${cur.citasAgendadas}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Agendadas</div>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 1.5rem;">→</div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #4338ca;">${cur.citasAtendidas}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Atendidas</div>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 1.5rem;">→</div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-green);">${cur.procedimientos}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Procedimientos</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderVentas(metrics, study, config) {
+        document.getElementById('content-area').innerHTML = `
+            <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
+                ${this.statCard('Venta Total', metrics.ventaTotal, 0, '$')}
+                ${this.statCard('Utilidad Neta', metrics.utilidad, 0, '$')}
+                ${this.statCard('ROE (ROI)', parseFloat((metrics.roe * 100).toFixed(1)), 0, '', false, '%')}
+                ${this.statCard('Costo Operativo', metrics.opCosts, 0, '$', true)}
+            </div>
+
+            <div class="card-premium animate-fade-in">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Composición de Gastos y Rentabilidad</h3>
+                <div style="display: flex; gap: 2rem;">
+                    <div style="flex: 2; display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display:flex; justify-content:space-between; font-size: 0.85rem;">
+                            <span>Costos Operación</span><b>$${metrics.opCosts.toLocaleString()}</b>
+                        </div>
+                        <div style="height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${(metrics.opCosts / metrics.gastosTotales * 100) || 0}%; height: 100%; background: var(--text-muted);"></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size: 0.85rem;">
+                            <span>Inversión Marketing Total</span><b>$${metrics.inversionTotal.toLocaleString()}</b>
+                        </div>
+                        <div style="height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${(metrics.inversionTotal / metrics.gastosTotales * 100) || 0}%; height: 100%; background: var(--primary);"></div>
+                        </div>
+                    </div>
+                    <div style="flex: 1; background: rgba(16,185,129,0.05); border-radius: 1rem; padding: 1.5rem; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Utilidad Neta</span>
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--accent-green); margin: 0.5rem 0;">$${metrics.utilidad.toLocaleString()}</div>
+                        <span style="font-size: 0.85rem; font-weight: 600;">Margen: ${((metrics.utilidad / (metrics.ventaTotal || 1)) * 100).toFixed(1)}%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderConfig(client) {
+        const study = DataManager.getStudy();
+        document.getElementById('content-area').innerHTML = `
+            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="card-premium">
+                    <div class="section-header"><h3>Identidad del Cliente</h3></div>
+                    <div class="input-group"><label>Costos Operativos Fijos ($)</label><input type="number" id="c-costos" class="premium-input" value="${client.config.costos}"></div>
+                    <div class="input-group" style="margin-top: 1rem;"><label>Inversión KWIQ ($)</label><input type="number" id="c-fee" class="premium-input" value="${client.config.inversion}"></div>
+                    <div class="input-group" style="margin-top: 1rem;"><label>LeadConnector ($)</label><input type="number" id="c-lc" class="premium-input" value="${client.config.lc}"></div>
+                    <button onclick="App.saveClientConfig()" class="btn-premium" style="margin-top: 1.5rem;">Actualizar Identidad</button>
+                    
+                    <div class="section-header" style="margin-top: 2.5rem;"><h3>Vision AI & Soportes</h3></div>
+                    <div class="ocr-zone" onclick="document.getElementById('m-upload').click()">
+                        <ion-icon name="scan-outline"></ion-icon>
+                        <p>Analizar Captura de Meta/Ventas</p>
+                        <input type="file" id="m-upload" accept="image/*" onchange="App.handleOCR(event)" style="display:none">
+                    </div>
+                </div>
+
+                <div class="card-premium">
+                    <div class="section-header"><h3>Carga de Datos: ${state.context.activePeriod}</h3></div>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Métricas para el estudio del periodo actual.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="input-group"><label>Venta Total ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" value="${study.ventas.ventaTotal}"></div>
+                        <div class="input-group"><label>Inversión Ads ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
+                        <div class="input-group"><label>Resultados (Leads)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div class="input-group"><label>Agendadas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
+                        <div class="input-group"><label>Atendidas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
+                        <div class="input-group"><label>Procs</label><input type="number" onchange="App.updateStudyField('operacion', 'procedimientos', this.value)" class="premium-input" value="${study.operacion.procedimientos}"></div>
+                    </div>
+                    
+                    <div class="input-group" style="margin-top: 1rem;"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
                 </div>
             </div>
         `;
@@ -320,65 +371,76 @@ const UIManager = {
 
     statCard(title, val, prevVal, prefix = '', invert = false, suffix = '') {
         const diff = val - prevVal;
-        let pct = 0; if (prevVal > 0) pct = ((diff / prevVal) * 100).toFixed(0); else if (prevVal === 0 && val > 0) pct = 100;
+        let pct = prevVal !== 0 ? ((diff / prevVal) * 100).toFixed(0) : (val > 0 ? 100 : 0);
         const color = (pct >= 0 !== invert) ? 'trend-up' : 'trend-down';
         return `
-            <div class="card" style="padding:1.5rem">
-                <div class="card-title" style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div class="card">
+                <div class="card-title">
                     <span>${title}</span>
                     <span class="${color}" style="font-weight:700; font-size:0.75rem;">${pct >= 0 ? '↑' : '↓'} ${Math.abs(pct)}%</span>
                 </div>
-                <div class="card-value" style="margin-top:1rem; font-size:1.5rem;">${prefix}${val.toLocaleString()}${suffix}</div>
+                <div class="card-value">${prefix}${val.toLocaleString()}${suffix}</div>
             </div>
         `;
     }
 };
 
-// --- 6. MAIN APPLICATION CONTROLLER (ORCHESTRATOR) ---
+// --- 6. MAIN APPLICATION CONTROLLER ---
 const App = {
-    async init() {
+    init() {
         PersistenceManager.load();
-        MetaService.init();
         UIManager.showSection('dashboard');
-        if (state.credentials.metaToken) {
-            await MetaService.fetchAccounts();
-            if (state.config.selectedAdAccount) await MetaService.fetchInsights();
+    },
+    setClient(name) {
+        if (name === '+ NEW') {
+            const newName = prompt("Nombre del nuevo cliente:");
+            if (newName) {
+                state.clients[newName] = { config: { costos: 0, inversion: 0, lc: 0 }, estudios: {} };
+                state.context.activeClient = newName;
+            }
+        } else {
+            state.context.activeClient = name;
         }
+        PersistenceManager.save();
+        UIManager.showSection(state.currentSection);
+    },
+    setPeriod(val) {
+        state.context.activePeriod = val;
+        PersistenceManager.save();
+        UIManager.showSection(state.currentSection);
+    },
+    updateStudyField(module, field, val) {
+        const study = DataManager.getStudy();
+        study[module][field] = parseFloat(val) || 0;
+        PersistenceManager.save();
+        UIManager.showSection(state.currentSection);
+    },
+    saveClientConfig() {
+        const c = DataManager.getClient();
+        c.config.costos = parseFloat(document.getElementById('c-costos').value) || 0;
+        c.config.inversion = parseFloat(document.getElementById('c-fee').value) || 0;
+        c.config.lc = parseFloat(document.getElementById('c-lc').value) || 0;
+        PersistenceManager.save();
+        alert("Identidad del cliente actualizada.");
+        UIManager.showSection('dashboard');
     },
     async handleOCR(event) {
         const file = event.target.files[0]; if (!file) return;
-        const loader = document.createElement('div');
-        loader.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; display:flex; align-items:center; justify-content:center; color:white;";
-        loader.innerHTML = "<div>Vision AI Analizando...</div>";
-        document.body.appendChild(loader);
         try {
             const { data: { text } } = await Tesseract.recognize(file, 'spa+eng');
             const clean = text.replace(/([0-9])\s*([.,])\s*([0-9])/g, '$1$2$3');
-            const numbers = DataSyncManager.extractNumbers(clean);
-            DataSyncManager.mapMetrics(numbers, true, clean);
-        } catch (e) { alert("Error Vision AI"); }
-        finally { loader.remove(); }
-    },
-    processManual() {
-        const text = document.getElementById('m-manual').value;
-        if (!text) return alert("Pega datos primero.");
-        const numbers = DataSyncManager.extractNumbers(text);
-        DataSyncManager.mapMetrics(numbers, true, text);
-    },
-    saveFinance() {
-        state.data.currentMonth.ventas.costos = parseFloat(document.getElementById('m-costos').value) || 0;
-        state.data.currentMonth.ventas.inversion = parseFloat(document.getElementById('m-fee').value) || 0;
-        state.data.currentMonth.ventas.leadConnector = parseFloat(document.getElementById('m-lc').value) || 0;
-        PersistenceManager.save();
-        alert("Identidad Financiera Actualizada.");
-        UIManager.showSection('ventas');
+            const regex = /([\d,.]+)/g;
+            let match, nums = [];
+            while ((match = regex.exec(clean)) !== null) {
+                let val = parseFloat(match[1].replace(/[,.](?=\d{3})/g, '').replace(',', '.'));
+                if (!isNaN(val)) nums.push(val);
+            }
+            alert(`Vision AI detectó ${nums.length} números. Úsalos como referencia para la carga manual.`);
+        } catch (e) { console.error(e); }
     }
 };
 
-// Start
 window.onload = () => App.init();
-// Bridge
 window.showSection = (id) => UIManager.showSection(id);
-window.loginWithMeta = () => MetaService.login();
-window.selectAdAccount = (id) => { state.config.selectedAdAccount = id; PersistenceManager.save(); MetaService.fetchInsights(); };
-window.toggleGA = () => { state.config.hasGA = !state.config.hasGA; PersistenceManager.save(); UIManager.showSection('config'); };
+// Bridge for context selectors injected in HTML
+window.App = App;
