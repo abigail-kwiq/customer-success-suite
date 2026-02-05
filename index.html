@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execution Compass | Dashboard Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Ionicons for beautiful icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Facebook SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/es_LA/sdk.js"></script>
+    <!-- Tesseract.js for OCR -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <ion-icon name="compass-outline"></ion-icon>
+            Execution Compass
+        </div>
+        <nav>
+            <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+                <ion-icon name="grid-outline"></ion-icon> Dashboard
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('marketing')">
+                <ion-icon name="megaphone-outline"></ion-icon> Marketing
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('operaciones')">
+                <ion-icon name="briefcase-outline"></ion-icon> Operaciones
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('ventas')">
+                <ion-icon name="cash-outline"></ion-icon> Ventas y Finanzas
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('config')">
+                <ion-icon name="settings-outline"></ion-icon> Conexiones
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <div class="header-title">
+                <h1 id="view-title">Dashboard Ejecutivo</h1>
+                <p id="view-subtitle">Resumen mensual de rendimiento • Enero 2026</p>
+            </div>
+            <div class="header-actions">
+                <span class="badge badge-blue">Sincronizado: Justo ahora</span>
+            </div>
+        </header>
+
+        <div id="content-area">
+            <!-- Dynamic Content Loaded by JS -->
+            <div class="loading-state" style="padding: 2rem; color: var(--text-muted);">
+                Cargando datos del dashboard...
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
