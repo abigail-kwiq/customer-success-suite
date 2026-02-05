@@ -241,21 +241,24 @@ const UIManager = {
     },
 
     renderOperaciones(el, cur, prev, metrics) {
+        const hasProcedures = cur.operacion.procedimientos > 0;
         el.innerHTML = `
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
                 ${this.statCard('Agendadas', cur.operacion.citasAgendadas, 0)}
                 ${this.statCard('Atendidas', cur.operacion.citasAtendidas, 0)}
                 ${this.statCard('% Asistencia', metrics.assistRate.toFixed(1), 0, '', false, '%')}
-                ${this.statCard('Procedimientos', cur.operacion.procedimientos, 0)}
+                ${hasProcedures ? this.statCard('Procedimientos', cur.operacion.procedimientos, 0) : ''}
             </div>
             <div class="card-premium animate-fade-in">
                 <h3 style="margin-bottom: 2rem; font-size: 1rem;">Flujo de Conversión Comercial</h3>
-                <div style="display:flex; justify-content: space-between; align-items: center; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem;">
+                <div style="display:flex; justify-content: center; align-items: center; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem; gap: 3rem;">
                     <div style="text-align:center;"><b>${cur.operacion.citasAgendadas}</b><br><small>Agendadas</small></div>
                     <div style="font-size: 2rem; color: var(--text-muted);">→</div>
                     <div style="text-align:center; color: #4338ca;"><b>${cur.operacion.citasAtendidas}</b><br><small>Atendidas</small></div>
-                    <div style="font-size: 2rem; color: var(--text-muted);">→</div>
-                    <div style="text-align:center; color: var(--accent-green);"><b>${cur.operacion.procedimientos}</b><br><small>Procedimientos</small></div>
+                    ${hasProcedures ? `
+                        <div style="font-size: 2rem; color: var(--text-muted);">→</div>
+                        <div style="text-align:center; color: var(--accent-green);"><b>${cur.operacion.procedimientos}</b><br><small>Procedimientos</small></div>
+                    ` : ''}
                 </div>
             </div>
         `;
