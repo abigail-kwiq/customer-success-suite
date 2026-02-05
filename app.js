@@ -166,33 +166,32 @@ const UIManager = {
                     <p style="opacity: 0.9;">Utilidad Neta: <b>$${cur.utilidad.toLocaleString()}</b> | Margen: <b>${margin}%</b></p>
                 </div>
                 <div style="text-align: right;">
-                    <span style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase;">ROE Histórico</span>
+                    <span style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase;">ROE Total</span>
                     <div style="font-size: 1.5rem; font-weight: 800;">${(cur.roe * 100).toFixed(1)}%</div>
                 </div>
             </div>
 
             <div class="animate-fade-in">
-                <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Marketing de Resultados</h3>
-                <div class="dashboard-grid" style="margin-bottom: 2.5rem;">
-                    ${this.statCard('Inversión Ads', cur.pauta, prev.pauta, '$', true)}
+                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Marketing</h3>
+                <div class="dashboard-grid" style="margin-bottom: 2rem;">
                     ${this.statCard('Alcance', cur.alcance, prev.alcance)}
                     ${this.statCard('Impresiones', cur.impresiones, prev.impresiones)}
-                    ${this.statCard('Leads (Resultados)', cur.resultados, prev.resultados)}
-                    ${this.statCard('Costo por Lead', cur.cpl, prev.cpl, '$', true)}
+                    ${this.statCard('Leads', cur.resultados, prev.resultados)}
+                    ${this.statCard('CPL', cur.cpl, prev.cpl, '$', true)}
+                    ${this.statCard('Ad Spend', cur.pauta, prev.pauta, '$', true)}
                 </div>
 
-                <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Operaciones & Conversión</h3>
-                <div class="dashboard-grid" style="margin-bottom: 2.5rem;">
-                    ${this.statCard('Citas Agendadas', cur.citasAgendadas, prev.citasAgendadas)}
-                    ${this.statCard('Citas Atendidas', cur.citasAtendidas, prev.citasAtendidas)}
+                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Operaciones</h3>
+                <div class="dashboard-grid" style="margin-bottom: 2rem;">
+                    ${this.statCard('Agendadas', cur.citasAgendadas, prev.citasAgendadas)}
+                    ${this.statCard('Atendidas', cur.citasAtendidas, prev.citasAtendidas)}
                     ${this.statCard('% Asistencia', parseFloat(cur.tasaAsistencia.toFixed(1)), parseFloat(prev.tasaAsistencia.toFixed(1)), '', false, '%')}
-                    ${this.statCard('Procedimientos', cur.procedimientos, prev.procedimientos)}
                 </div>
 
-                <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Revenue & Rentabilidad</h3>
-                <div class="dashboard-grid" style="margin-bottom: 2.5rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Finanzas</h3>
+                <div class="dashboard-grid">
                     ${this.statCard('Venta Total', cur.ventaTotal, prev.ventaTotal, '$')}
-                    ${this.statCard('Utilidad Neta', cur.utilidad, prev.utilidad, '$')}
+                    ${this.statCard('Utilidad Bruta', cur.utilidad, prev.utilidad, '$')}
                     ${this.statCard('ROAS', parseFloat(cur.roas.toFixed(2)), parseFloat(prev.roas.toFixed(2)), '', false, 'x')}
                     ${this.statCard('ROE (ROI)', parseFloat((cur.roe * 100).toFixed(1)), parseFloat((prev.roe * 100).toFixed(1)), '', false, '%')}
                 </div>
@@ -202,55 +201,51 @@ const UIManager = {
 
     renderMarketing(cur, prev) {
         document.getElementById('content-area').innerHTML = `
-            <div class="config-grid animate-fade-in">
-                <div class="card-premium">
-                    <div class="section-header"><h3>Carga Manual: Canales</h3></div>
-                    <div class="input-group"><label>Inversión Publicitaria ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${cur.marketing.adSpend}"></div>
-                    <div class="input-group"><label>Resultados (Leads)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${cur.marketing.resultados}"></div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
-                        <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${cur.marketing.alcance}"></div>
-                        <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${cur.marketing.impresiones}"></div>
-                    </div>
-                </div>
-                <div class="card-premium">
-                    <div class="section-header"><h3>Soportes & Vision AI</h3></div>
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Alcance Total', cur.alcance, prev.alcance)}
+                ${this.statCard('Alcance', cur.alcance, prev.alcance)}
                 ${this.statCard('Impresiones', cur.impresiones, prev.impresiones)}
                 ${this.statCard('Leads (Resultados)', cur.resultados, prev.resultados)}
-                ${this.statCard('Inversión Publicitaria', cur.pauta, prev.pauta, '$', true)}
+                ${this.statCard('Costo / Resultado', cur.cpl, prev.cpl, '$', true)}
+                ${this.statCard('Ad Spend', cur.pauta, prev.pauta, '$', true)}
             </div>
 
-            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                <div class="card-premium">
-                    <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Rendimiento de Visibilidad</h3>
-                    <div style="height: 200px; display: flex; align-items: flex-end; gap: 1rem; padding-top: 1rem;">
-                        <div style="flex: 1; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
-                            <div style="width: 100%; background: var(--primary); height: 75%; border-radius: 0.5rem 0.5rem 0 0; opacity: 0.8;"></div>
-                            <span style="font-size: 0.7rem; margin-top: 0.5rem; color: var(--text-muted);">Alcance</span>
+            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;">
+                <div class="card-premium" style="min-height: 380px; display: flex; flex-direction: column;">
+                    <h3 style="margin-bottom: 2rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Rendimiento Publicitario (Visual)</h3>
+                    <div style="flex: 1; display: flex; align-items: flex-end; justify-content: space-around; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem;">
+                        <!-- Alcance -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+                            <div style="width: 50px; background: var(--primary); height: 160px; border-radius: 0.5rem; transition: height 1s ease-out; position: relative;">
+                                <div style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 800;">${(cur.alcance / 1000).toFixed(1)}k</div>
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">Alcance</span>
                         </div>
-                        <div style="flex: 1; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
-                            <div style="width: 100%; background: #4338ca; height: 100%; border-radius: 0.5rem 0.5rem 0 0;"></div>
-                            <span style="font-size: 0.7rem; margin-top: 0.5rem; color: var(--text-muted);">Impresiones</span>
+                        <!-- Impresiones -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+                            <div style="width: 50px; background: #4338ca; height: 100%; max-height: 220px; min-height: 100px; border-radius: 0.5rem; transition: height 1s ease-out; position: relative;">
+                                <div style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 800;">${(cur.impresiones / 1000).toFixed(1)}k</div>
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">Impresiones</span>
+                        </div>
+                        <!-- Resultados -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+                            <div style="width: 50px; background: #6366f1; height: 140px; border-radius: 0.5rem; transition: height 1s ease-out; position: relative;">
+                                <div style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 800;">${cur.resultados}</div>
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">Leads</span>
                         </div>
                     </div>
                 </div>
-                <div class="card-premium">
-                    <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Eficiencia de Conversión</h3>
-                    <div style="padding: 1rem; background: rgba(16,185,129,0.05); border-radius: 0.75rem;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">Costo por Lead (CPL)</span>
-                            <b style="color: var(--primary);">$${cur.cpl.toFixed(2)}</b>
-                        </div>
-                        <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden;">
-                            <div style="width: ${Math.min((cur.cpl / 50) * 100, 100)}%; height: 100%; background: var(--primary);"></div>
-                        </div>
+
+                <div class="card-premium" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <h3 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Eficiencia de Inversión</h3>
+                    <div style="flex: 1; background: rgba(16,185,129,0.05); border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Costo por Resultado</span>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--primary);">$${cur.cpl.toFixed(2)}</div>
                     </div>
-                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(67, 56, 202, 0.05); border-radius: 0.75rem;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">ROAS de Inversión</span>
-                            <b style="color: #4338ca;">${cur.roas.toFixed(2)}x</b>
-                        </div>
+                    <div style="flex: 1; background: rgba(67, 56, 202, 0.05); border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Retorno ROAS (X)</span>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: #4338ca;">${cur.roas.toFixed(2)}x</div>
                     </div>
                 </div>
             </div>
