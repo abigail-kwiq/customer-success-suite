@@ -83,7 +83,14 @@ const FinanceManager = {
             roas: pauta > 0 ? (v.ventaTotal / pauta) : 0,
             roe: totalCosts > 0 ? (profit / totalCosts) : 0,
             assistRate: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
-            cpl: m.resultados > 0 ? (pauta / m.resultados) : 0
+            cpl: m.resultados > 0 ? (pauta / m.resultados) : 0,
+            // Métricas crudas para el dashboard
+            alcance: m.alcance || 0,
+            impresiones: m.impresiones || 0,
+            resultados: m.resultados || 0,
+            citasAgendadas: study.operacion.citasAgendadas || 0,
+            citasAtendidas: study.operacion.citasAtendidas || 0,
+            procedimientos: study.operacion.procedimientos || 0
         };
     }
 };
@@ -285,10 +292,12 @@ const UIManager = {
     },
 
     statCard(title, val, prevVal, prefix = '', invert = false, suffix = '') {
-        const diff = val - prevVal;
-        let pct = prevVal != 0 ? ((diff / prevVal) * 100).toFixed(0) : (val > 0 ? 100 : 0);
+        const v = parseFloat(val) || 0;
+        const pv = parseFloat(prevVal) || 0;
+        const diff = v - pv;
+        let pct = pv != 0 ? ((diff / pv) * 100).toFixed(0) : (v > 0 ? 100 : 0);
         const color = (pct >= 0 !== invert) ? 'trend-up' : 'trend-down';
-        return `<div class="card"><div class="card-title"><span>${title}</span><span class="${color}">${pct >= 0 ? '↑' : '↓'} ${Math.abs(pct)}%</span></div><div class="card-value">${prefix}${val.toLocaleString()}${suffix}</div></div>`;
+        return `<div class="card"><div class="card-title"><span>${title}</span><span class="${color}">${pct >= 0 ? '↑' : '↓'} ${Math.abs(pct)}%</span></div><div class="card-value">${prefix}${v.toLocaleString()}${suffix}</div></div>`;
     },
 
     renderChartBar(label, val, max, color) {
