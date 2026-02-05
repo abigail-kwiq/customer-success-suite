@@ -65,6 +65,16 @@ const DataManager = {
     getComparisonStudy() {
         const prevPeriod = this.getPreviousPeriod(state.context.activePeriod);
         return this.getClient().estudios[prevPeriod] || null;
+    },
+    getCumulativeProfit() {
+        const client = this.getClient();
+        let total = 0;
+        for (const period in client.estudios) {
+            const study = client.estudios[period];
+            const metrics = FinanceManager.calculate(study, client.config);
+            total += metrics.profit;
+        }
+        return total;
     }
 };
 
@@ -149,6 +159,7 @@ const UIManager = {
 
     renderDashboard(el, cur, prev) {
         const margin = cur.ventaTotal > 0 ? ((cur.profit / cur.ventaTotal) * 100).toFixed(1) : 0;
+        const cumulativeProfit = DataManager.getCumulativeProfit();
         el.innerHTML = `
             <div class="card-premium animate-fade-in" style="background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%); color: white; padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
                 <div>
@@ -167,7 +178,7 @@ const UIManager = {
                     ${this.statCard('Alcance', cur.alcance, prev.alcance)}
                     ${this.statCard('Impresiones', cur.impresiones, prev.impresiones)}
                     ${this.statCard('Leads', cur.resultados, prev.resultados)}
-                    ${this.statCard('CPL', cur.cpl, prev.cpl, '$', true)}
+                    ${this.statCard('Costo por Resultado', cur.cpl, prev.cpl, '$', true)}
                     ${this.statCard('Ad Spend', cur.pauta, prev.pauta, '$', true)}
                 </div>
 
@@ -181,7 +192,8 @@ const UIManager = {
                 <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Finanzas</h3>
                 <div class="dashboard-grid">
                     ${this.statCard('Venta Total', cur.ventaTotal, prev.ventaTotal, '$')}
-                    ${this.statCard('Utilidad Bruta', cur.profit, prev.profit, '$')}
+                    ${this.statCard('Utilidad', cur.profit, prev.profit, '$')}
+                    ${this.statCard('Utilidad Acumulada', cumulativeProfit, 0, '$')}
                     ${this.statCard('ROAS', cur.roas.toFixed(2), prev.roas.toFixed(2), '', false, 'x')}
                     ${this.statCard('ROE (ROI)', (cur.roe * 100).toFixed(1), (prev.roe * 100).toFixed(1), '', false, '%')}
                 </div>
@@ -197,7 +209,7 @@ const UIManager = {
                 ${this.statCard('Alcance', m.alcance, pm.alcance)}
                 ${this.statCard('Impresiones', m.impresiones, pm.impresiones)}
                 ${this.statCard('Leads (Resultados)', m.resultados, pm.resultados)}
-                ${this.statCard('Costo / Resultado', metrics.cpl, 0, '$', true)}
+                ${this.statCard('Costo por Resultado', metrics.cpl, 0, '$', true)}
                 ${this.statCard('Ad Spend', m.adSpend, pm.adSpend, '$', true)}
             </div>
 
@@ -216,7 +228,7 @@ const UIManager = {
                         <div style="font-size: 3rem; font-weight: 800; color: #4338ca;">${metrics.roas.toFixed(2)}x</div>
                     </div>
                     <div style="text-align: center;">
-                        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Costo por Lead</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Costo por Resultado</span>
                         <div style="font-size: 3rem; font-weight: 800; color: var(--primary);">$${metrics.cpl.toFixed(2)}</div>
                     </div>
                 </div>
@@ -253,7 +265,7 @@ const UIManager = {
         el.innerHTML = `
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
                 ${this.statCard('Venta Total', m.ventaTotal, 0, '$')}
-                ${this.statCard('Utilidad Bruta', m.profit, 0, '$')}
+                ${this.statCard('Utilidad', m.profit, 0, '$')}
                 ${this.statCard('ROE (ROI)', (m.roe * 100).toFixed(1), 0, '', false, '%')}
                 ${this.statCard('Inversión Ads', m.pauta, 0, '$', true)}
             </div>
