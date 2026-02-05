@@ -1,6 +1,6 @@
 /**
- * Execution Intelligence Suite v5.0 - "Consultancy" Architecture
- * Multi-Client, Monthly Studies, and Manual Executive Data Entry.
+ * Execution Intelligence Suite v5.4 - "Execution Compass"
+ * STRICT ISOLATION & EXECUTIVE ANALYTICS
  */
 
 // --- 1. CONFIGURATION & STATE ---
@@ -8,7 +8,7 @@ const state = {
     currentSection: 'dashboard',
     context: {
         activeClient: 'Cliente Demo',
-        activePeriod: '2026-01' // YYYY-MM
+        activePeriod: '2026-01'
     },
     clients: {
         'Cliente Demo': {
@@ -37,19 +37,18 @@ const PersistenceManager = {
         const raw = localStorage.getItem(this.key);
         if (raw) {
             const parsed = JSON.parse(raw);
-            state.context = parsed.context;
-            state.clients = parsed.clients;
+            if (parsed.context) state.context = parsed.context;
+            if (parsed.clients) state.clients = parsed.clients;
         }
     }
 };
 
-// --- 3. DATA ENGINE (CONTEXT & COMPARISON) ---
+// --- 3. DATA ENGINE ---
 const DataManager = {
-    getClient() { return state.clients[state.context.activeClient]; },
+    getClient() { return state.clients[state.context.activeClient] || state.clients['Cliente Demo']; },
     getStudy(period = state.context.activePeriod) {
         const c = this.getClient();
         if (!c.estudios[period]) {
-            // New study template
             c.estudios[period] = {
                 marketing: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
                 operacion: { citasAgendadas: 0, citasAtendidas: 0, procedimientos: 0 },
@@ -69,44 +68,33 @@ const DataManager = {
     }
 };
 
-// --- 4. BUSINESS LOGIC (FINANCIAL ENGINE) ---
+// --- 4. FINANCIAL ENGINE ---
 const FinanceManager = {
     calculate(study, clientConfig) {
         const m = study.marketing;
         const v = study.ventas;
-
-        // Use manual override in study if present, otherwise use client defaults
         const pauta = v.pauta || m.adSpend;
-        const invKWIQ = v.inversion || clientConfig.inversion;
-        const lc = v.leadConnector || clientConfig.lc;
-        const opCosts = v.costos || clientConfig.costos;
-
-        const inversionTotal = pauta + invKWIQ + lc;
-        const gastosTotales = inversionTotal + opCosts;
-        const utilidad = v.ventaTotal - gastosTotales;
+        const totalMarketing = pauta + (v.inversion || clientConfig.inversion) + (v.leadConnector || clientConfig.lc);
+        const totalCosts = totalMarketing + (v.costos || clientConfig.costos);
+        const profit = v.ventaTotal - totalCosts;
 
         return {
-            pauta, invKWIQ, lc, opCosts,
-            inversionTotal, gastosTotales, ventaTotal: v.ventaTotal, utilidad,
+            pauta, totalMarketing, totalCosts, ventaTotal: v.ventaTotal, profit,
             roas: pauta > 0 ? (v.ventaTotal / pauta) : 0,
-            roe: gastosTotales > 0 ? (utilidad / gastosTotales) : 0,
-            tasaAsistencia: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
-            cpl: m.resultados > 0 ? (pauta / m.resultados) : 0,
-            // Raw metrics for dashboard
-            alcance: m.alcance,
-            impresiones: m.impresiones,
-            resultados: m.resultados,
-            citasAgendadas: study.operacion.citasAgendadas,
-            citasAtendidas: study.operacion.citasAtendidas,
-            procedimientos: study.operacion.procedimientos
+            roe: totalCosts > 0 ? (profit / totalCosts) : 0,
+            assistRate: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
+            cpl: m.resultados > 0 ? (pauta / m.resultados) : 0
         };
     }
 };
 
-// --- 5. UI & RENDERING ENGINE ---
+// --- 5. UI ENGINE ---
 const UIManager = {
     showSection(id) {
+        console.log(`Rendering Section: ${id}`);
         state.currentSection = id;
+
+        // UI cleanup
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         const nav = Array.from(document.querySelectorAll('.nav-item')).find(i => i.getAttribute('onclick')?.includes(id));
         if (nav) nav.classList.add('active');
@@ -114,250 +102,182 @@ const UIManager = {
         const client = DataManager.getClient();
         const curStudy = DataManager.getStudy();
         const prevStudy = DataManager.getComparisonStudy();
-
         const curMetrics = FinanceManager.calculate(curStudy, client.config);
         const prevMetrics = prevStudy ? FinanceManager.calculate(prevStudy, client.config) : curMetrics;
 
-        // Update header info
-        const title = document.getElementById('view-title');
-        const subtitle = document.getElementById('view-subtitle');
-        title.innerText = this.getSectionTitle(id);
-        subtitle.innerText = `${state.context.activeClient} • Periodo: ${state.context.activePeriod}`;
+        document.getElementById('view-title').innerText = this.getSectionTitle(id);
+        document.getElementById('view-subtitle').innerText = `${state.context.activeClient} • ${state.context.activePeriod}`;
+
+        const container = document.getElementById('content-area');
+        container.innerHTML = ''; // Force Clean
 
         switch (id) {
-            case 'dashboard': this.renderDashboard(curMetrics, prevMetrics); break;
-            case 'marketing': this.renderMarketing(curStudy, prevStudy); break;
-            case 'operaciones': this.renderOperaciones(curStudy, prevStudy); break;
-            case 'ventas': this.renderVentas(curMetrics, curStudy, client.config); break;
-            case 'config': this.renderConfig(client); break;
+            case 'dashboard': this.renderDashboard(container, curMetrics, prevMetrics); break;
+            case 'marketing': this.renderMarketing(container, curStudy, prevStudy, curMetrics); break;
+            case 'operaciones': this.renderOperaciones(container, curStudy, prevStudy, curMetrics); break;
+            case 'ventas': this.renderVentas(container, curMetrics, curStudy, client.config); break;
+            case 'config': this.renderConfig(container, client, curStudy); break;
         }
-
-        this.renderContextSelector(); // Add selectors to header if not present
+        this.renderContextSelector();
     },
 
     getSectionTitle(id) {
-        const m = { dashboard: 'Dashboard Ejecutivo', marketing: 'Marketing', operaciones: 'Operaciones CRM', ventas: 'Finanzas & ROI', config: 'Consultoría Config' };
+        const m = { dashboard: 'Compass Dashboard', marketing: 'Análisis Marketing', operaciones: 'Embudo Comercial', ventas: 'Visión Financiera', config: 'Centro de Control' };
         return m[id] || 'Suite';
     },
 
     renderContextSelector() {
         const header = document.querySelector('.header-actions');
         if (!header) return;
-
-        let clientOptions = Object.keys(state.clients).map(c => `<option value="${c}" ${c === state.context.activeClient ? 'selected' : ''}>${c}</option>`).join('');
-
         header.innerHTML = `
             <div style="display:flex; gap:0.5rem; align-items:center;">
-                <select onchange="App.setClient(this.value)" class="premium-input" style="padding:0.4rem 0.75rem; width:150px; font-size:0.75rem;">
-                    ${clientOptions}
-                    <option value="+ NEW">+ Nuevo Cliente</option>
+                <select onchange="App.setClient(this.value)" class="premium-input" style="padding:0.4rem; font-size:0.75rem;">
+                    ${Object.keys(state.clients).map(c => `<option value="${c}" ${c === state.context.activeClient ? 'selected' : ''}>${c}</option>`).join('')}
+                    <option value="+ NEW">+ Nuevo</option>
                 </select>
-                <input type="month" value="${state.context.activePeriod}" onchange="App.setPeriod(this.value)" class="premium-input" style="padding:0.4rem 0.75rem; width:140px; font-size:0.75rem;">
+                <input type="month" value="${state.context.activePeriod}" onchange="App.setPeriod(this.value)" class="premium-input" style="padding:0.4rem; font-size:0.75rem;">
             </div>
         `;
     },
 
-    renderDashboard(cur, prev) {
-        const margin = cur.ventaTotal > 0 ? ((cur.utilidad / cur.ventaTotal) * 100).toFixed(1) : 0;
-        document.getElementById('content-area').innerHTML = `
+    renderDashboard(el, cur, prev) {
+        const margin = cur.ventaTotal > 0 ? ((cur.profit / cur.ventaTotal) * 100).toFixed(1) : 0;
+        el.innerHTML = `
             <div class="card-premium animate-fade-in" style="background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%); color: white; padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem;">Execution Compass</h2>
-                    <p style="opacity: 0.9;">Utilidad Neta: <b>$${cur.utilidad.toLocaleString()}</b> | Margen: <b>${margin}%</b></p>
+                    <p style="opacity: 0.9;">Utilidad Neta: <b>$${cur.profit.toLocaleString()}</b> | Margen: <b>${margin}%</b></p>
                 </div>
                 <div style="text-align: right;">
-                    <span style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase;">ROE Total</span>
-                    <div style="font-size: 1.5rem; font-weight: 800;">${(cur.roe * 100).toFixed(1)}%</div>
+                    <span style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase;">ROE (ROI)</span>
+                    <div style="font-size: 1.75rem; font-weight: 800;">${(cur.roe * 100).toFixed(1)}%</div>
                 </div>
             </div>
 
-            <div class="animate-fade-in">
-                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Marketing</h3>
-                <div class="dashboard-grid" style="margin-bottom: 2rem;">
-                    ${this.statCard('Alcance', cur.alcance, prev.alcance)}
-                    ${this.statCard('Impresiones', cur.impresiones, prev.impresiones)}
-                    ${this.statCard('Leads', cur.resultados, prev.resultados)}
-                    ${this.statCard('CPL', cur.cpl, prev.cpl, '$', true)}
-                    ${this.statCard('Ad Spend', cur.pauta, prev.pauta, '$', true)}
-                </div>
+            <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
+                ${this.statCard('Inversión Ads', cur.pauta, prev.pauta, '$', true)}
+                ${this.statCard('Leads Totales', cur.alcance, prev.alcance)}
+                ${this.statCard('Venta Bruta', cur.ventaTotal, prev.ventaTotal, '$')}
+                ${this.statCard('% Asistencia', cur.assistRate.toFixed(1), prev.assistRate.toFixed(1), '', false, '%')}
+            </div>
 
-                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Operaciones</h3>
-                <div class="dashboard-grid" style="margin-bottom: 2rem;">
-                    ${this.statCard('Agendadas', cur.citasAgendadas, prev.citasAgendadas)}
-                    ${this.statCard('Atendidas', cur.citasAtendidas, prev.citasAtendidas)}
-                    ${this.statCard('% Asistencia', parseFloat(cur.tasaAsistencia.toFixed(1)), parseFloat(prev.tasaAsistencia.toFixed(1)), '', false, '%')}
-                </div>
-
-                <h3 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Visión General: Finanzas</h3>
-                <div class="dashboard-grid">
-                    ${this.statCard('Venta Total', cur.ventaTotal, prev.ventaTotal, '$')}
-                    ${this.statCard('Utilidad Bruta', cur.utilidad, prev.utilidad, '$')}
-                    ${this.statCard('ROAS', parseFloat(cur.roas.toFixed(2)), parseFloat(prev.roas.toFixed(2)), '', false, 'x')}
-                    ${this.statCard('ROE (ROI)', parseFloat((cur.roe * 100).toFixed(1)), parseFloat((prev.roe * 100).toFixed(1)), '', false, '%')}
-                </div>
+            <div class="dashboard-grid animate-fade-in">
+                ${this.statCard('CPL Promedio', cur.cpl, prev.cpl, '$', true)}
+                ${this.statCard('Utilidad Real', cur.profit, prev.profit, '$')}
+                ${this.statCard('ROAS Total', cur.roas.toFixed(2), prev.roas.toFixed(2), '', false, 'x')}
             </div>
         `;
     },
 
-    renderMarketing(cur, prev) {
-        document.getElementById('content-area').innerHTML = `
+    renderMarketing(el, cur, prev, metrics) {
+        const m = cur.marketing;
+        const pm = prev ? prev.marketing : m;
+        el.innerHTML = `
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Alcance', cur.alcance, prev.alcance)}
-                ${this.statCard('Impresiones', cur.impresiones, prev.impresiones)}
-                ${this.statCard('Leads (Resultados)', cur.resultados, prev.resultados)}
-                ${this.statCard('Costo / Resultado', cur.cpl, prev.cpl, '$', true)}
-                ${this.statCard('Ad Spend', cur.pauta, prev.pauta, '$', true)}
+                ${this.statCard('Alcance', m.alcance, pm.alcance)}
+                ${this.statCard('Impresiones', m.impresiones, pm.impresiones)}
+                ${this.statCard('Leads (Resultados)', m.resultados, pm.resultados)}
+                ${this.statCard('Costo / Resultado', metrics.cpl, 0, '$', true)}
+                ${this.statCard('Ad Spend', m.adSpend, pm.adSpend, '$', true)}
             </div>
 
             <div class="animate-fade-in" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;">
-                <div class="card-premium" style="min-height: 380px; display: flex; flex-direction: column;">
-                    <h3 style="margin-bottom: 2rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Rendimiento Publicitario (Visual)</h3>
-                    <div style="flex: 1; display: flex; align-items: flex-end; justify-content: space-around; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem;">
-                        <!-- Alcance -->
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
-                            <div style="width: 50px; background: var(--primary); height: 160px; border-radius: 0.5rem; transition: height 1s ease-out; position: relative;">
-                                <div style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 800;">${(cur.alcance / 1000).toFixed(1)}k</div>
-                            </div>
-                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">Alcance</span>
-                        </div>
-                        <!-- Impresiones -->
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
-                            <div style="width: 50px; background: #4338ca; height: 100%; max-height: 220px; min-height: 100px; border-radius: 0.5rem; transition: height 1s ease-out; position: relative;">
-                                <div style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 800;">${(cur.impresiones / 1000).toFixed(1)}k</div>
-                            </div>
-                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">Impresiones</span>
-                        </div>
-                        <!-- Resultados -->
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
-                            <div style="width: 50px; background: #6366f1; height: 140px; border-radius: 0.5rem; transition: height 1s ease-out; position: relative;">
-                                <div style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 800;">${cur.resultados}</div>
-                            </div>
-                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">Leads</span>
-                        </div>
+                <div class="card-premium" style="min-height: 400px; display: flex; flex-direction: column;">
+                    <h3 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2rem;">Rendimiento Audiencia e Inversión</h3>
+                    <div style="flex: 1; display:flex; align-items: flex-end; justify-content: space-around; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem;">
+                        ${this.renderChartBar('Alcance', m.alcance, 100000, 'var(--primary)')}
+                        ${this.renderChartBar('Impresiones', m.impresiones, 200000, '#4338ca')}
+                        ${this.renderChartBar('Venta', cur.ventas.ventaTotal, 200000, '#10b981')}
                     </div>
                 </div>
-
-                <div class="card-premium" style="display: flex; flex-direction: column; gap: 1.5rem;">
-                    <h3 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Eficiencia de Inversión</h3>
-                    <div style="flex: 1; background: rgba(16,185,129,0.05); border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Costo por Resultado</span>
-                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--primary);">$${cur.cpl.toFixed(2)}</div>
+                <div class="card-premium" style="display: flex; flex-direction: column; justify-content: center; gap: 2rem;">
+                    <div style="text-align: center;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Retorno ROAS</span>
+                        <div style="font-size: 3rem; font-weight: 800; color: #4338ca;">${metrics.roas.toFixed(2)}x</div>
                     </div>
-                    <div style="flex: 1; background: rgba(67, 56, 202, 0.05); border-radius: 1rem; padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Retorno ROAS (X)</span>
-                        <div style="font-size: 2.25rem; font-weight: 800; color: #4338ca;">${cur.roas.toFixed(2)}x</div>
+                    <div style="text-align: center;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Costo por Lead</span>
+                        <div style="font-size: 3rem; font-weight: 800; color: var(--primary);">$${metrics.cpl.toFixed(2)}</div>
                     </div>
                 </div>
             </div>
+            <style>
+                @keyframes growUp { from { height: 0; } }
+                .chart-bar { animation: growUp 1.5s ease-out; }
+            </style>
         `;
     },
 
-    renderOperaciones(cur, prev) {
-        document.getElementById('content-area').innerHTML = `
+    renderOperaciones(el, cur, prev, metrics) {
+        el.innerHTML = `
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Citas Agendadas', cur.citasAgendadas, prev.citasAgendadas)}
-                ${this.statCard('Citas Atendidas', cur.citasAtendidas, prev.citasAtendidas)}
-                ${this.statCard('% Asistencia', parseFloat(cur.tasaAsistencia.toFixed(1)), parseFloat(prev.tasaAsistencia.toFixed(1)), '', false, '%')}
-                ${this.statCard('Procedimientos', cur.procedimientos, prev.procedimientos)}
+                ${this.statCard('Agendadas', cur.operacion.citasAgendadas, 0)}
+                ${this.statCard('Atendidas', cur.operacion.citasAtendidas, 0)}
+                ${this.statCard('% Asistencia', metrics.assistRate.toFixed(1), 0, '', false, '%')}
+                ${this.statCard('Procedimientos', cur.operacion.procedimientos, 0)}
             </div>
-            
             <div class="card-premium animate-fade-in">
-                <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Eficiencia del Embudo Comercial</h3>
-                <div style="display: flex; align-items: center; gap: 2rem;">
-                    <div style="flex: 1; text-align: center;">
-                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${cur.citasAgendadas}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">Agendadas</div>
-                    </div>
-                    <div style="color: var(--text-muted); font-size: 1.5rem;">→</div>
-                    <div style="flex: 1; text-align: center;">
-                        <div style="font-size: 1.5rem; font-weight: 800; color: #4338ca;">${cur.citasAtendidas}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">Atendidas</div>
-                    </div>
-                    <div style="color: var(--text-muted); font-size: 1.5rem;">→</div>
-                    <div style="flex: 1; text-align: center;">
-                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-green);">${cur.procedimientos}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">Procedimientos</div>
-                    </div>
+                <h3 style="margin-bottom: 2rem; font-size: 1rem;">Flujo de Conversión Comercial</h3>
+                <div style="display:flex; justify-content: space-between; align-items: center; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem;">
+                    <div style="text-align:center;"><b>${cur.operacion.citasAgendadas}</b><br><small>Agendadas</small></div>
+                    <div style="font-size: 2rem; color: var(--text-muted);">→</div>
+                    <div style="text-align:center; color: #4338ca;"><b>${cur.operacion.citasAtendidas}</b><br><small>Atendidas</small></div>
+                    <div style="font-size: 2rem; color: var(--text-muted);">→</div>
+                    <div style="text-align:center; color: var(--accent-green);"><b>${cur.operacion.procedimientos}</b><br><small>Procedimientos</small></div>
                 </div>
             </div>
         `;
     },
 
-    renderVentas(metrics, study, config) {
-        document.getElementById('content-area').innerHTML = `
+    renderVentas(el, m, cur, config) {
+        el.innerHTML = `
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Venta Total', metrics.ventaTotal, 0, '$')}
-                ${this.statCard('Utilidad Neta', metrics.utilidad, 0, '$')}
-                ${this.statCard('ROE (ROI)', parseFloat((metrics.roe * 100).toFixed(1)), 0, '', false, '%')}
-                ${this.statCard('Costo Operativo', metrics.opCosts, 0, '$', true)}
+                ${this.statCard('Venta Total', m.ventaTotal, 0, '$')}
+                ${this.statCard('Utilidad Bruta', m.profit, 0, '$')}
+                ${this.statCard('ROE (ROI)', (m.roe * 100).toFixed(1), 0, '', false, '%')}
+                ${this.statCard('Inversión Ads', m.pauta, 0, '$', true)}
             </div>
-
             <div class="card-premium animate-fade-in">
-                <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Composición de Gastos y Rentabilidad</h3>
-                <div style="display: flex; gap: 2rem;">
-                    <div style="flex: 2; display: flex; flex-direction: column; gap: 1rem;">
-                        <div style="display:flex; justify-content:space-between; font-size: 0.85rem;">
-                            <span>Costos Operación</span><b>$${metrics.opCosts.toLocaleString()}</b>
-                        </div>
-                        <div style="height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden;">
-                            <div style="width: ${(metrics.opCosts / metrics.gastosTotales * 100) || 0}%; height: 100%; background: var(--text-muted);"></div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; font-size: 0.85rem;">
-                            <span>Inversión Marketing Total</span><b>$${metrics.inversionTotal.toLocaleString()}</b>
-                        </div>
-                        <div style="height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden;">
-                            <div style="width: ${(metrics.inversionTotal / metrics.gastosTotales * 100) || 0}%; height: 100%; background: var(--primary);"></div>
-                        </div>
-                    </div>
-                    <div style="flex: 1; background: rgba(16,185,129,0.05); border-radius: 1rem; padding: 1.5rem; text-align: center; display: flex; flex-direction: column; justify-content: center;">
-                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Utilidad Neta</span>
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--accent-green); margin: 0.5rem 0;">$${metrics.utilidad.toLocaleString()}</div>
-                        <span style="font-size: 0.85rem; font-weight: 600;">Margen: ${((metrics.utilidad / (metrics.ventaTotal || 1)) * 100).toFixed(1)}%</span>
-                    </div>
+                <h3 style="margin-bottom: 1.5rem;">Desglose de Costos de Proyecto</h3>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    ${this.renderCostLine('Personal & Op', cur.ventas.costos || config.costos, m.totalCosts, 'var(--text-muted)')}
+                    ${this.renderCostLine('Inversión Marketing', m.totalMarketing, m.totalCosts, 'var(--primary)')}
                 </div>
             </div>
         `;
     },
 
-    renderConfig(client) {
-        const study = DataManager.getStudy();
-        document.getElementById('content-area').innerHTML = `
+    renderConfig(el, client, study) {
+        el.innerHTML = `
             <div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                 <div class="card-premium">
-                    <div class="section-header"><h3>Identidad del Cliente</h3></div>
-                    <div class="input-group"><label>Costos Operativos Fijos ($)</label><input type="number" id="c-costos" class="premium-input" value="${client.config.costos}"></div>
-                    <div class="input-group" style="margin-top: 1rem;"><label>Inversión KWIQ ($)</label><input type="number" id="c-fee" class="premium-input" value="${client.config.inversion}"></div>
-                    <div class="input-group" style="margin-top: 1rem;"><label>LeadConnector ($)</label><input type="number" id="c-lc" class="premium-input" value="${client.config.lc}"></div>
-                    <button onclick="App.saveClientConfig()" class="btn-premium" style="margin-top: 1.5rem;">Actualizar Identidad</button>
-                    
-                    <div class="section-header" style="margin-top: 2.5rem;"><h3>Vision AI & Soportes</h3></div>
-                    <div class="ocr-zone" onclick="document.getElementById('m-upload').click()">
-                        <ion-icon name="scan-outline"></ion-icon>
-                        <p>Analizar Captura de Meta/Ventas</p>
-                        <input type="file" id="m-upload" accept="image/*" onchange="App.handleOCR(event)" style="display:none">
+                    <h3 class="section-header">Configuración del Cliente</h3>
+                    <div class="input-group"><label>Costos Fijos Operativos</label><input type="number" id="cfg-costos" class="premium-input" value="${client.config.costos}"></div>
+                    <div class="input-group"><label>Fee KWIQ</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
+                    <div class="input-group"><label>LeadConnector</label><input type="number" id="cfg-lc" class="premium-input" value="${client.config.lc}"></div>
+                    <button onclick="App.saveClientConfig()" class="btn-premium" style="margin-top: 1rem;">Guardar Identidad</button>
+                    <hr style="margin: 2rem 0; opacity: 0.1;">
+                    <h3 class="section-header">Vision AI</h3>
+                    <div class="ocr-zone" onclick="document.getElementById('ocr-input').click()">
+                        <p>Analizar Captura de Meta/CRM</p>
+                        <input type="file" id="ocr-input" accept="image/*" onchange="App.handleOCR(event)" style="display:none">
                     </div>
                 </div>
-
                 <div class="card-premium">
-                    <div class="section-header"><h3>Carga de Datos: ${state.context.activePeriod}</h3></div>
-                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Métricas para el estudio del periodo actual.</p>
-                    
+                    <h3 class="section-header">Carga Mensual: ${state.context.activePeriod}</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="input-group"><label>Venta Total ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" value="${study.ventas.ventaTotal}"></div>
-                        <div class="input-group"><label>Inversión Ads ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+                        <div class="input-group"><label>Venta ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" value="${study.ventas.ventaTotal}"></div>
+                        <div class="input-group"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
                     </div>
-                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
                         <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
-                        <div class="input-group"><label>Resultados (Leads)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
+                        <div class="input-group"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
                     </div>
-
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                        <div class="input-group"><label>Agendadas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
-                        <div class="input-group"><label>Atendidas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
+                        <div class="input-group"><label>Agend.</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
+                        <div class="input-group"><label>Atend.</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
                         <div class="input-group"><label>Procs</label><input type="number" onchange="App.updateStudyField('operacion', 'procedimientos', this.value)" class="premium-input" value="${study.operacion.procedimientos}"></div>
                     </div>
-                    
                     <div class="input-group" style="margin-top: 1rem;"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
                 </div>
             </div>
@@ -366,76 +286,51 @@ const UIManager = {
 
     statCard(title, val, prevVal, prefix = '', invert = false, suffix = '') {
         const diff = val - prevVal;
-        let pct = prevVal !== 0 ? ((diff / prevVal) * 100).toFixed(0) : (val > 0 ? 100 : 0);
+        let pct = prevVal != 0 ? ((diff / prevVal) * 100).toFixed(0) : (val > 0 ? 100 : 0);
         const color = (pct >= 0 !== invert) ? 'trend-up' : 'trend-down';
-        return `
-            <div class="card">
-                <div class="card-title">
-                    <span>${title}</span>
-                    <span class="${color}" style="font-weight:700; font-size:0.75rem;">${pct >= 0 ? '↑' : '↓'} ${Math.abs(pct)}%</span>
-                </div>
-                <div class="card-value">${prefix}${val.toLocaleString()}${suffix}</div>
-            </div>
-        `;
+        return `<div class="card"><div class="card-title"><span>${title}</span><span class="${color}">${pct >= 0 ? '↑' : '↓'} ${Math.abs(pct)}%</span></div><div class="card-value">${prefix}${val.toLocaleString()}${suffix}</div></div>`;
+    },
+
+    renderChartBar(label, val, max, color) {
+        const height = Math.min((val / max) * 100, 100);
+        return `<div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; width: 60px;"><div class="chart-bar" style="width:100%; background:${color}; height:${height * 2}px; border-radius: 8px; position:relative;"><div style="position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:0.7rem; font-weight:700;">${(val / 1000).toFixed(1)}k</div></div><span style="font-size:0.7rem; color:var(--text-muted); font-weight:600;">${label}</span></div>`;
+    },
+
+    renderCostLine(label, val, total, color) {
+        const pct = total > 0 ? (val / total * 100).toFixed(1) : 0;
+        return `<div><div style="display:flex; justify-content:space-between; font-size: 0.8rem; margin-bottom: 0.25rem;"><span>${label}</span><b>$${val.toLocaleString()} (${pct}%)</b></div><div style="width:100%; height:8px; background: rgba(0,0,0,0.05); border-radius:4px;"><div style="width:${pct}%; height:100%; background:${color}; border-radius:4px;"></div></div></div>`;
     }
 };
 
-// --- 6. MAIN APPLICATION CONTROLLER ---
+// --- 6. CONTROLLER ---
 const App = {
-    init() {
-        PersistenceManager.load();
-        UIManager.showSection('dashboard');
-    },
+    init() { PersistenceManager.load(); UIManager.showSection('dashboard'); },
     setClient(name) {
         if (name === '+ NEW') {
-            const newName = prompt("Nombre del nuevo cliente:");
-            if (newName) {
-                state.clients[newName] = { config: { costos: 0, inversion: 0, lc: 0 }, estudios: {} };
-                state.context.activeClient = newName;
-            }
-        } else {
-            state.context.activeClient = name;
-        }
-        PersistenceManager.save();
-        UIManager.showSection(state.currentSection);
+            const n = prompt("Nombre:");
+            if (n) { state.clients[n] = { config: { costos: 0, inversion: 0, lc: 0 }, estudios: {} }; state.context.activeClient = n; }
+        } else { state.context.activeClient = name; }
+        PersistenceManager.save(); UIManager.showSection(state.currentSection);
     },
-    setPeriod(val) {
-        state.context.activePeriod = val;
-        PersistenceManager.save();
-        UIManager.showSection(state.currentSection);
-    },
-    updateStudyField(module, field, val) {
-        const study = DataManager.getStudy();
-        study[module][field] = parseFloat(val) || 0;
-        PersistenceManager.save();
-        UIManager.showSection(state.currentSection);
-    },
+    setPeriod(val) { state.context.activePeriod = val; PersistenceManager.save(); UIManager.showSection(state.currentSection); },
+    updateStudyField(mod, field, val) { const s = DataManager.getStudy(); s[mod][field] = parseFloat(val) || 0; PersistenceManager.save(); UIManager.showSection(state.currentSection); },
     saveClientConfig() {
         const c = DataManager.getClient();
-        c.config.costos = parseFloat(document.getElementById('c-costos').value) || 0;
-        c.config.inversion = parseFloat(document.getElementById('c-fee').value) || 0;
-        c.config.lc = parseFloat(document.getElementById('c-lc').value) || 0;
-        PersistenceManager.save();
-        alert("Identidad del cliente actualizada.");
-        UIManager.showSection('dashboard');
+        c.config.costos = parseFloat(document.getElementById('cfg-costos').value) || 0;
+        c.config.inversion = parseFloat(document.getElementById('cfg-fee').value) || 0;
+        c.config.lc = parseFloat(document.getElementById('cfg-lc').value) || 0;
+        PersistenceManager.save(); alert("Identidad Actualizada"); UIManager.showSection('dashboard');
     },
-    async handleOCR(event) {
-        const file = event.target.files[0]; if (!file) return;
+    async handleOCR(e) {
+        const file = e.target.files[0]; if (!file) return;
         try {
             const { data: { text } } = await Tesseract.recognize(file, 'spa+eng');
-            const clean = text.replace(/([0-9])\s*([.,])\s*([0-9])/g, '$1$2$3');
-            const regex = /([\d,.]+)/g;
-            let match, nums = [];
-            while ((match = regex.exec(clean)) !== null) {
-                let val = parseFloat(match[1].replace(/[,.](?=\d{3})/g, '').replace(',', '.'));
-                if (!isNaN(val)) nums.push(val);
-            }
-            alert(`Vision AI detectó ${nums.length} números. Úsalos como referencia para la carga manual.`);
+            alert("Vision AI analizó la imagen. Datos detectados listos para referencia.");
+            console.log("OCR Output:", text);
         } catch (e) { console.error(e); }
     }
 };
 
 window.onload = () => App.init();
 window.showSection = (id) => UIManager.showSection(id);
-// Bridge for context selectors injected in HTML
 window.App = App;
