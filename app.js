@@ -392,7 +392,6 @@ const UIManager = {
 
                             <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem;">
                                 <h4 style="margin-top:0; color:var(--accent-green); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;">Ventas Finales</h4>
-                                <div class="input-group"><label>Venta Total ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" value="${study.ventas.ventaTotal}"></div>
                                 <div class="input-group"><label>Pauta Directa ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'pauta', this.value)" class="premium-input" value="${study.ventas.pauta}"></div>
                             </div>
                         </div>
