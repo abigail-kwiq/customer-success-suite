@@ -365,6 +365,12 @@ const UIManager = {
                             <button onclick="App.testGHLConnection()" class="btn-secondary" style="font-size: 0.75rem;">Vincular GoHighLevel</button>
                         </div>
                     </div>
+                    
+                    <div class="card-premium" style="padding: 1rem; background: rgba(255,193,7,0.05); border: 1px solid rgba(255,193,7,0.1);">
+                        <p style="margin:0; font-size: 0.7rem; color: #b48600; line-height: 1.4;">
+                            💡 <b>Automatización Activa:</b> La venta total se calcula usando los valores de identidad y los resultados operativos cargados al centro.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Área Principal: Carga de Inteligencia -->
@@ -372,7 +378,7 @@ const UIManager = {
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem;">
                         <div>
                             <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem;">Carga Operativa: ${state.context.activePeriod}</h3>
-                            <p style="margin:0; font-size: 0.85rem; color: var(--text-muted);">Alimenta el Compass con los datos del mes actual.</p>
+                            <p style="margin:0; font-size: 0.85rem; color: var(--text-muted);">Gestiona los datos de marketing y operación del mes.</p>
                         </div>
                         <div style="display:flex; gap: 0.75rem;">
                             <button onclick="document.getElementById('ocr-input').click()" class="btn-premium" style="width: auto; padding: 0.6rem 1.25rem; font-size: 0.75rem; background: var(--primary);">
@@ -382,61 +388,40 @@ const UIManager = {
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
                         <!-- Módulo Marketing -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
-                        <!-- Módulo Marketing -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                             <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); margin-bottom: 0.5rem;">
                                 <ion-icon name="megaphone-outline" style="font-size: 1.2rem;"></ion-icon>
                                 <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Marketing</h4>
                             </div>
                             <div class="input-group"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
                             <div class="input-group"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
-                            <div class="input-group" style="background: rgba(99, 102, 241, 0.05); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(99, 102, 241, 0.1);">
-                                <label style="color: var(--primary);">Costo por Resultado ($)</label>
-                                <input type="number" step="0.01" onchange="App.updateStudyField('marketing', 'cpl', this.value)" class="premium-input" style="background:transparent; border:none; padding: 0.25rem;" value="${study.marketing.resultados > 0 ? (study.marketing.adSpend / study.marketing.resultados).toFixed(2) : 0}">
+                            <div class="input-group" style="background: rgba(99, 102, 241, 0.05); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.1);">
+                                <label style="color: var(--primary); font-weight: 600;">Calculadora de CPL ($)</label>
+                                <input type="number" step="0.01" onchange="App.updateStudyField('marketing', 'cpl', this.value)" class="premium-input" style="background:transparent; border:none;" value="${study.marketing.resultados > 0 ? (study.marketing.adSpend / study.marketing.resultados).toFixed(2) : 0}">
+                                <p style="margin: 0.5rem 0 0 0; font-size: 0.65rem; color: var(--text-muted);">Ajusta el CPL para recalcular el Ad Spend automáticamente.</p>
                             </div>
                             <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
                             <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
                         </div>
 
                         <!-- Módulo Operación -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding: 0 0.75rem; border-right: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-left: 3rem; border-left: 1px solid rgba(255,255,255,0.05);">
                             <div style="display:flex; align-items:center; gap:0.5rem; color:#4338ca; margin-bottom: 0.5rem;">
                                 <ion-icon name="calendar-outline" style="font-size: 1.2rem;"></ion-icon>
                                 <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Operativa</h4>
                             </div>
-                            <div class="input-group"><label>Agendadas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
-                            <div class="input-group"><label>Atendidas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
+                            <div class="input-group"><label>Citas Agendadas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
+                            <div class="input-group"><label>Citas Atendidas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
                             <div class="input-group"><label>Procedimientos</label><input type="number" onchange="App.updateStudyField('operacion', 'procedimientos', this.value)" class="premium-input" value="${study.operacion.procedimientos}"></div>
-                            <div style="margin-top: auto; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 0.5rem; font-size: 0.7rem; color: var(--text-muted); line-height: 1.4;">
-                                💡 El sistema calculará la <b>Venta Total</b> automáticamente.
-                            </div>
-                        </div>
-
-                        <!-- Módulo Resultados Financieros -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--accent-green); margin-bottom: 0.5rem;">
-                                <ion-icon name="cash-outline" style="font-size: 1.2rem;"></ion-icon>
-                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Resultados</h4>
-                            </div>
                             
-                            <!-- VENTA REAL (Carga Manual) -->
-                            <div class="input-group">
-                                <label style="font-weight: 700;">Venta Total (Cierre Real)</label>
-                                <input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" style="border-color: var(--accent-green);" value="${study.ventas.ventaTotal}">
-                            </div>
-
-                            <!-- PROYECCIÓN KPI (Referencia) -->
-                            <div style="margin-top: 0.5rem; padding: 1.25rem; background: rgba(255,255,255,0.03); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.05);">
-                                <span style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; display: block; margin-bottom: 0.25rem;">Proyección por KPIs</span>
-                                <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-green);">
+                            <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(67, 56, 202, 0.05)); border-radius: 1rem; border: 1px solid rgba(99, 102, 241, 0.1);">
+                                <h5 style="margin: 0 0 0.5rem 0; font-size: 0.7rem; text-transform: uppercase; color: var(--primary);">Impacto en Ventas</h5>
+                                <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">
                                     $${((study.operacion.citasAtendidas * (client.config.valorCita || 0)) + (study.operacion.procedimientos * (client.config.valorProcedimiento || 0))).toLocaleString()}
                                 </div>
-                                <p style="font-size: 0.65rem; color: var(--text-muted); margin: 0.5rem 0 0 0; line-height: 1.3;">
-                                    Calculado según citas atendidas y procedimientos realizados.
-                                </p>
+                                <p style="margin: 0.5rem 0 0 0; font-size: 0.65rem; color: var(--text-muted);">Este valor se actualiza automáticamente en Ventas y Finanzas.</p>
                             </div>
                         </div>
                     </div>
@@ -478,6 +463,7 @@ const App = {
     setPeriod(val) { state.context.activePeriod = val; PersistenceManager.save(); UIManager.showSection(state.currentSection); },
     updateStudyField(mod, field, val) {
         const s = DataManager.getStudy();
+        const c = DataManager.getClient();
         const numVal = parseFloat(val) || 0;
 
         if (mod === 'marketing' && field === 'cpl') {
@@ -486,6 +472,12 @@ const App = {
             }
         } else {
             s[mod][field] = numVal;
+        }
+
+        // AUTO-CALCULO VENTA TOTAL
+        if (mod === 'operacion') {
+            s.ventas.ventaTotal = (s.operacion.citasAtendidas * (c.config.valorCita || 0)) +
+                (s.operacion.procedimientos * (c.config.valorProcedimiento || 0));
         }
 
         PersistenceManager.save();
