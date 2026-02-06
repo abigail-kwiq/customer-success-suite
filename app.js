@@ -88,7 +88,7 @@ const FinanceManager = {
     calculate(study, clientConfig) {
         const m = study.marketing;
         const v = study.ventas;
-        const pauta = v.pauta || m.adSpend;
+        const pauta = m.adSpend;
         const invQuick = v.inversion || clientConfig.inversion;
         const lcCosts = v.leadConnector || clientConfig.lc;
         const clientCosts = v.costos || clientConfig.costos;
@@ -389,7 +389,7 @@ const UIManager = {
                                 <ion-icon name="megaphone-outline" style="font-size: 1.2rem;"></ion-icon>
                                 <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Marketing</h4>
                             </div>
-                            <div class="input-group"><label>Ad Spend (Plataforma)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+                            <div class="input-group"><label>Inversión en Pauta ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
                             <div class="input-group"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
                             <div class="input-group" style="background: rgba(99, 102, 241, 0.05); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(99, 102, 241, 0.1);">
                                 <label style="color: var(--primary);">Costo por Resultado ($)</label>
@@ -417,9 +417,12 @@ const UIManager = {
                         <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                             <div style="display:flex; align-items:center; gap:0.5rem; color:var(--accent-green); margin-bottom: 0.5rem;">
                                 <ion-icon name="cash-outline" style="font-size: 1.2rem;"></ion-icon>
-                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Extras</h4>
+                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Estado</h4>
                             </div>
-                            <div class="input-group"><label>Pauta Directa ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'pauta', this.value)" class="premium-input" value="${study.ventas.pauta}"></div>
+                            <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 1rem;">
+                                <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; display: block; margin-bottom: 0.5rem;">Pauta Detectada</span>
+                                <div style="font-size: 1.25rem; font-weight: 700;">$${(study.marketing.adSpend || 0).toLocaleString()}</div>
+                            </div>
                             <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border-radius: 1rem; border: 1px solid rgba(16, 185, 129, 0.1);">
                                 <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--accent-green); font-weight: 800; display: block; margin-bottom: 0.5rem;">Proyección Actual</span>
                                 <div style="font-size: 1.5rem; font-weight: 800;">$${(study.ventas.ventaTotal || 0).toLocaleString()}</div>
