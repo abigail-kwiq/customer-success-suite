@@ -415,16 +415,28 @@ const UIManager = {
                             </div>
                         </div>
 
-                        <!-- Módulo Ventas Extras -->
+                        <!-- Módulo Resultados Financieros -->
                         <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                             <div style="display:flex; align-items:center; gap:0.5rem; color:var(--accent-green); margin-bottom: 0.5rem;">
                                 <ion-icon name="cash-outline" style="font-size: 1.2rem;"></ion-icon>
-                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Ingresos</h4>
+                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Resultados</h4>
                             </div>
-                            <div style="margin-top: 1rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border-radius: 1rem; border: 1px solid rgba(16, 185, 129, 0.1);">
-                                <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--accent-green); font-weight: 800; display: block; margin-bottom: 0.5rem;">Proyección de Venta</span>
-                                <div style="font-size: 1.5rem; font-weight: 800;">$${(study.ventas.ventaTotal || 0).toLocaleString()}</div>
-                                <p style="font-size: 0.7rem; color: var(--text-muted); margin: 0.5rem 0 0 0;">Calculado sobre actividad operativa y valores de identidad.</p>
+                            
+                            <!-- VENTA REAL (Carga Manual) -->
+                            <div class="input-group">
+                                <label style="font-weight: 700;">Venta Total (Cierre Real)</label>
+                                <input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" style="border-color: var(--accent-green);" value="${study.ventas.ventaTotal}">
+                            </div>
+
+                            <!-- PROYECCIÓN KPI (Referencia) -->
+                            <div style="margin-top: 0.5rem; padding: 1.25rem; background: rgba(255,255,255,0.03); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; display: block; margin-bottom: 0.25rem;">Proyección por KPIs</span>
+                                <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-green);">
+                                    $${((study.operacion.citasAtendidas * (client.config.valorCita || 0)) + (study.operacion.procedimientos * (client.config.valorProcedimiento || 0))).toLocaleString()}
+                                </div>
+                                <p style="font-size: 0.65rem; color: var(--text-muted); margin: 0.5rem 0 0 0; line-height: 1.3;">
+                                    Calculado según citas atendidas y procedimientos realizados.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -466,25 +478,14 @@ const App = {
     setPeriod(val) { state.context.activePeriod = val; PersistenceManager.save(); UIManager.showSection(state.currentSection); },
     updateStudyField(mod, field, val) {
         const s = DataManager.getStudy();
-        const c = DataManager.getClient();
         const numVal = parseFloat(val) || 0;
 
         if (mod === 'marketing' && field === 'cpl') {
-            // Lógica de Calculadora: Si pongo CPL, calculo AdSpend
             if (s.marketing.resultados > 0) {
                 s.marketing.adSpend = Math.round(numVal * s.marketing.resultados);
             }
         } else {
             s[mod][field] = numVal;
-        }
-
-        // Automatización de Venta Total (Productividad)
-        if (mod === 'operacion' || field === 'ventaTotal') {
-            if (c.config.valorCita || c.config.valorProcedimiento) {
-                const autoVenta = (s.operacion.citasAtendidas * (c.config.valorCita || 0)) +
-                    (s.operacion.procedimientos * (c.config.valorProcedimiento || 0));
-                if (autoVenta > 0) s.ventas.ventaTotal = autoVenta;
-            }
         }
 
         PersistenceManager.save();
