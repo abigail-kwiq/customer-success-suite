@@ -306,7 +306,7 @@ const UIManager = {
                     <h3 style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Desglose de Costos y Pauta</h3>
                     <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                         <div class="trend-row"><span>Costos del Cliente (Op)</span><b>$${m.clientCosts.toLocaleString()}</b></div>
-                        <div class="trend-row"><span>Inversión KWI.Q</span><b>$${m.invQuick.toLocaleString()}</b></div>
+                        <div class="trend-row"><span>Inversión Kwiq</span><b>$${m.invQuick.toLocaleString()}</b></div>
                         <div class="trend-row"><span>Lead Connector</span><b>$${m.lcCosts.toLocaleString()}</b></div>
                         <div class="trend-row" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);"><span>Pauta (Ad Spend)</span><b>$${m.pauta.toLocaleString()}</b></div>
                     </div>
@@ -333,7 +333,7 @@ const UIManager = {
                 <div class="card-premium">
                     <h3 class="section-header">Configuración del Cliente</h3>
                     <div class="input-group"><label>Costos Fijos Operativos</label><input type="number" id="cfg-costos" class="premium-input" value="${client.config.costos}"></div>
-                    <div class="input-group"><label>Fee KWI.Q</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
+                    <div class="input-group"><label>Fee Kwiq</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
                     <div class="input-group"><label>LeadConnector</label><input type="number" id="cfg-lc" class="premium-input" value="${client.config.lc}"></div>
                     <button onclick="App.saveClientConfig()" class="btn-premium" style="margin-top: 1rem;">Guardar Identidad</button>
                     <hr style="margin: 2rem 0; opacity: 0.1;">
