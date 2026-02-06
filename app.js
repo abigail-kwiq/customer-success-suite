@@ -389,10 +389,14 @@ const UIManager = {
                                 <ion-icon name="megaphone-outline" style="font-size: 1.2rem;"></ion-icon>
                                 <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Marketing</h4>
                             </div>
-                            <div class="input-group"><label>Ad Spend</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+                            <div class="input-group"><label>Ad Spend (Plataforma)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+                            <div class="input-group"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
+                            <div class="input-group" style="background: rgba(99, 102, 241, 0.05); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(99, 102, 241, 0.1);">
+                                <label style="color: var(--primary);">Costo por Resultado ($)</label>
+                                <input type="number" step="0.01" onchange="App.updateStudyField('marketing', 'cpl', this.value)" class="premium-input" style="background:transparent; border:none; padding: 0.25rem;" value="${study.marketing.resultados > 0 ? (study.marketing.adSpend / study.marketing.resultados).toFixed(2) : 0}">
+                            </div>
                             <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
                             <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
-                            <div class="input-group"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
                         </div>
 
                         <!-- Módulo Operación -->
@@ -462,9 +466,18 @@ const App = {
     updateStudyField(mod, field, val) {
         const s = DataManager.getStudy();
         const c = DataManager.getClient();
-        s[mod][field] = parseFloat(val) || 0;
+        const numVal = parseFloat(val) || 0;
 
-        // Automatización de Venta Total
+        if (mod === 'marketing' && field === 'cpl') {
+            // Lógica de Calculadora: Si pongo CPL, calculo AdSpend
+            if (s.marketing.resultados > 0) {
+                s.marketing.adSpend = Math.round(numVal * s.marketing.resultados);
+            }
+        } else {
+            s[mod][field] = numVal;
+        }
+
+        // Automatización de Venta Total (Productividad)
         if (mod === 'operacion' || field === 'ventaTotal') {
             if (c.config.valorCita || c.config.valorProcedimiento) {
                 const autoVenta = (s.operacion.citasAtendidas * (c.config.valorCita || 0)) +
