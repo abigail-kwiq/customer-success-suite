@@ -334,65 +334,92 @@ const UIManager = {
 
     renderConfig(el, client, study) {
         el.innerHTML = `
-            <div class="animate-fade-in" style="display: grid; grid-template-columns: 350px 1fr; gap: 2rem;">
-                <div style="display: flex; flex-direction: column; gap: 2rem;">
-                    <!-- Columna Izquierda: Identidad y API -->
-                    <div class="card-premium">
-                        <h3 class="section-header">Identidad Financiera</h3>
-                        <div class="input-group"><label>Costos Fijos Operativos</label><input type="number" id="cfg-costos" class="premium-input" value="${client.config.costos}"></div>
-                        <div class="input-group"><label>Fee Kwiq</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
-                        <div class="input-group"><label>LeadConnector</label><input type="number" id="cfg-lc" class="premium-input" value="${client.config.lc}"></div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding: 1rem; background: rgba(99, 102, 241, 0.05); border-radius: 1rem;">
-                            <div class="input-group" style="margin:0;"><label>Valor Cita ($)</label><input type="number" id="cfg-cita" class="premium-input" value="${client.config.valorCita || 0}"></div>
-                            <div class="input-group" style="margin:0;"><label>Valor Proc ($)</label><input type="number" id="cfg-proc" class="premium-input" value="${client.config.valorProcedimiento || 0}"></div>
+            <div class="animate-fade-in" style="display: grid; grid-template-columns: 320px 1fr; gap: 2.5rem; align-items: start;">
+                
+                <!-- Columna Lateral: Configuración Maestra -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="card-premium" style="padding: 1.5rem; border-left: 4px solid var(--primary);">
+                        <div class="section-header" style="margin-bottom: 1rem;">
+                            <ion-icon name="options-outline"></ion-icon>
+                            <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Identidad & API</h3>
                         </div>
-                        <button onclick="App.saveClientConfig()" class="btn-premium" style="margin-top: 1rem;">Guardar Identidad</button>
-                    </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                            <div class="input-group"><label>Costos Operativos</label><input type="number" id="cfg-costos" class="premium-input" value="${client.config.costos}"></div>
+                            <div class="input-group"><label>Fee Kwiq</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
+                            <div class="input-group"><label>LeadConnector</label><input type="number" id="cfg-lc" class="premium-input" value="${client.config.lc}"></div>
+                            
+                            <div style="padding: 1rem; background: rgba(99, 102, 241, 0.05); border-radius: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.1);">
+                                <div class="input-group" style="margin-bottom: 0.75rem;"><label>Valor Cita ($)</label><input type="number" id="cfg-cita" class="premium-input" value="${client.config.valorCita || 0}"></div>
+                                <div class="input-group"><label>Valor Procedimiento ($)</label><input type="number" id="cfg-proc" class="premium-input" value="${client.config.valorProcedimiento || 0}"></div>
+                            </div>
 
-                    <div class="card-premium" style="border-top: 4px solid var(--primary);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
-                            <h3 style="margin:0; font-size: 0.9rem; text-transform: uppercase;">Automatización API</h3>
-                            <span class="badge-status">Beta</span>
+                            <button onclick="App.saveClientConfig()" class="btn-premium" style="padding: 0.75rem;">Actualizar Identidad</button>
+                            
+                            <hr style="opacity: 0.05; margin: 0.5rem 0;">
+                            
+                            <div class="input-group">
+                                <label>GHL API Key (Beta)</label>
+                                <input type="password" id="ghl-key" class="premium-input" placeholder="••••••••" value="${client.config.ghlKey || ''}">
+                            </div>
+                            <button onclick="App.testGHLConnection()" class="btn-secondary" style="font-size: 0.75rem;">Vincular GoHighLevel</button>
                         </div>
-                        <div class="input-group">
-                            <label>GoHighLevel API Key</label>
-                            <input type="password" id="ghl-key" class="premium-input" placeholder="Ingresar API Key..." value="${client.config.ghlKey || ''}">
-                        </div>
-                        <button onclick="App.testGHLConnection()" class="btn-premium" style="background: var(--primary); width: 100%;">Vincular GHL</button>
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 2rem;">
-                    <!-- Columna Derecha: Carga de Datos -->
-                    <div class="card-premium">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
-                            <h3 style="margin:0;">Carga Mensual: ${state.context.activePeriod}</h3>
-                            <div style="display:flex; gap: 1rem;">
-                                <button onclick="App.setLoadingSource('manual')" style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: rgba(255,255,255,0.05); color:white; border:none; cursor:pointer; font-size: 0.8rem;">Manual</button>
-                                <button onclick="document.getElementById('ocr-input').click()" style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: var(--primary); color:white; border:none; cursor:pointer; font-size: 0.8rem;">Carga con Screenshot (IA)</button>
-                                <input type="file" id="ocr-input" accept="image/*" onchange="App.handleOCR(event)" style="display:none">
+                <!-- Área Principal: Carga de Inteligencia -->
+                <div class="card-premium" style="padding: 2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem;">Carga Operativa: ${state.context.activePeriod}</h3>
+                            <p style="margin:0; font-size: 0.85rem; color: var(--text-muted);">Alimenta el Compass con los datos del mes actual.</p>
+                        </div>
+                        <div style="display:flex; gap: 0.75rem;">
+                            <button onclick="document.getElementById('ocr-input').click()" class="btn-premium" style="width: auto; padding: 0.6rem 1.25rem; font-size: 0.75rem; background: var(--primary);">
+                                <ion-icon name="scan-outline"></ion-icon> Scan Screenshot (IA)
+                            </button>
+                            <input type="file" id="ocr-input" accept="image/*" onchange="App.handleOCR(event)" style="display:none">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                        <!-- Módulo Marketing -->
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); margin-bottom: 0.5rem;">
+                                <ion-icon name="megaphone-outline" style="font-size: 1.2rem;"></ion-icon>
+                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Marketing</h4>
+                            </div>
+                            <div class="input-group"><label>Ad Spend</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+                            <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
+                            <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
+                            <div class="input-group"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
+                        </div>
+
+                        <!-- Módulo Operación -->
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding: 0 0.75rem; border-right: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:#4338ca; margin-bottom: 0.5rem;">
+                                <ion-icon name="calendar-outline" style="font-size: 1.2rem;"></ion-icon>
+                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Operativa</h4>
+                            </div>
+                            <div class="input-group"><label>Agendadas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
+                            <div class="input-group"><label>Atendidas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
+                            <div class="input-group"><label>Procedimientos</label><input type="number" onchange="App.updateStudyField('operacion', 'procedimientos', this.value)" class="premium-input" value="${study.operacion.procedimientos}"></div>
+                            <div style="margin-top: auto; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 0.5rem; font-size: 0.7rem; color: var(--text-muted); line-height: 1.4;">
+                                💡 El sistema calculará la <b>Venta Total</b> automáticamente.
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
-                            <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem;">
-                                <h4 style="margin-top:0; color:var(--primary); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;">Marketing (Ads)</h4>
-                                <div class="input-group"><label>Ad Spend / Pauta</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
-                                <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
-                                <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
-                                <div class="input-group"><label>Resultados / Leads</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
+                        <!-- Módulo Ventas Extras -->
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--accent-green); margin-bottom: 0.5rem;">
+                                <ion-icon name="cash-outline" style="font-size: 1.2rem;"></ion-icon>
+                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Extras</h4>
                             </div>
-
-                            <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem;">
-                                <h4 style="margin-top:0; color:#4338ca; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;">Operación Comercial</h4>
-                                <div class="input-group"><label>Citas Agendadas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
-                                <div class="input-group"><label>Citas Atendidas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
-                                <div class="input-group"><label>Procedimientos</label><input type="number" onchange="App.updateStudyField('operacion', 'procedimientos', this.value)" class="premium-input" value="${study.operacion.procedimientos}"></div>
-                            </div>
-
-                            <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem;">
-                                <h4 style="margin-top:0; color:var(--accent-green); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;">Ventas Finales</h4>
-                                <div class="input-group"><label>Pauta Directa ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'pauta', this.value)" class="premium-input" value="${study.ventas.pauta}"></div>
+                            <div class="input-group"><label>Pauta Directa ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'pauta', this.value)" class="premium-input" value="${study.ventas.pauta}"></div>
+                            <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border-radius: 1rem; border: 1px solid rgba(16, 185, 129, 0.1);">
+                                <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--accent-green); font-weight: 800; display: block; margin-bottom: 0.5rem;">Proyección Actual</span>
+                                <div style="font-size: 1.5rem; font-weight: 800;">$${(study.ventas.ventaTotal || 0).toLocaleString()}</div>
+                                <p style="font-size: 0.7rem; color: var(--text-muted); margin: 0.5rem 0 0 0;">Basado en actividad operativa y valores de identidad.</p>
                             </div>
                         </div>
                     </div>
