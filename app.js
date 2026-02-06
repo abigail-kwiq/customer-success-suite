@@ -397,11 +397,12 @@ const UIManager = {
                             </div>
                             <div class="input-group"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
                             <div class="input-group"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
-                            <div class="input-group" style="background: rgba(99, 102, 241, 0.05); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.1);">
-                                <label style="color: var(--primary); font-weight: 600;">Calculadora de CPL ($)</label>
-                                <input type="number" step="0.01" onchange="App.updateStudyField('marketing', 'cpl', this.value)" class="premium-input" style="background:transparent; border:none;" value="${study.marketing.resultados > 0 ? (study.marketing.adSpend / study.marketing.resultados).toFixed(2) : 0}">
-                                <p style="margin: 0.5rem 0 0 0; font-size: 0.65rem; color: var(--text-muted);">Ajusta el CPL para recalcular el Ad Spend automáticamente.</p>
+                            
+                            <div class="input-group">
+                                <label style="color: var(--primary);">Costo por Resultado ($)</label>
+                                <input type="number" step="0.01" onchange="App.updateStudyField('marketing', 'cpl', this.value)" class="premium-input" value="${study.marketing.resultados > 0 ? (study.marketing.adSpend / study.marketing.resultados).toFixed(2) : 0}">
                             </div>
+
                             <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
                             <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
                         </div>
