@@ -12,7 +12,7 @@ const state = {
     },
     clients: {
         'Cliente Demo': {
-            config: { costos: 32000, inversion: 6361, lc: 2568 },
+            config: { costos: 32000, inversion: 6361, lc: 2568, valorCita: 1000, valorProcedimiento: 12000 },
             estudios: {
                 '2026-01': {
                     marketing: { impresiones: 182710, alcance: 94000, resultados: 344, adSpend: 8986 },
@@ -75,6 +75,11 @@ const DataManager = {
             total += metrics.profit;
         }
         return total;
+    },
+    updateClientConfig(updates) {
+        const c = this.getClient();
+        c.config = { ...c.config, ...updates };
+        PersistenceManager.save();
     }
 };
 
@@ -337,6 +342,10 @@ const UIManager = {
                         <div class="input-group"><label>Costos Fijos Operativos</label><input type="number" id="cfg-costos" class="premium-input" value="${client.config.costos}"></div>
                         <div class="input-group"><label>Fee Kwiq</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
                         <div class="input-group"><label>LeadConnector</label><input type="number" id="cfg-lc" class="premium-input" value="${client.config.lc}"></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding: 1rem; background: rgba(99, 102, 241, 0.05); border-radius: 1rem;">
+                            <div class="input-group" style="margin:0;"><label>Valor Cita ($)</label><input type="number" id="cfg-cita" class="premium-input" value="${client.config.valorCita || 0}"></div>
+                            <div class="input-group" style="margin:0;"><label>Valor Proc ($)</label><input type="number" id="cfg-proc" class="premium-input" value="${client.config.valorProcedimiento || 0}"></div>
+                        </div>
                         <button onclick="App.saveClientConfig()" class="btn-premium" style="margin-top: 1rem;">Guardar Identidad</button>
                     </div>
 
@@ -424,7 +433,23 @@ const App = {
         PersistenceManager.save(); UIManager.showSection(state.currentSection);
     },
     setPeriod(val) { state.context.activePeriod = val; PersistenceManager.save(); UIManager.showSection(state.currentSection); },
-    updateStudyField(mod, field, val) { const s = DataManager.getStudy(); s[mod][field] = parseFloat(val) || 0; PersistenceManager.save(); UIManager.showSection(state.currentSection); },
+    updateStudyField(mod, field, val) {
+        const s = DataManager.getStudy();
+        const c = DataManager.getClient();
+        s[mod][field] = parseFloat(val) || 0;
+
+        // Automatización de Venta Total
+        if (mod === 'operacion' || field === 'ventaTotal') {
+            if (c.config.valorCita || c.config.valorProcedimiento) {
+                const autoVenta = (s.operacion.citasAtendidas * (c.config.valorCita || 0)) +
+                    (s.operacion.procedimientos * (c.config.valorProcedimiento || 0));
+                if (autoVenta > 0) s.ventas.ventaTotal = autoVenta;
+            }
+        }
+
+        PersistenceManager.save();
+        UIManager.showSection(state.currentSection);
+    },
     testGHLConnection() {
         const key = document.getElementById('ghl-key').value;
         if (!key) return UIState.showNotification('Por favor ingrese una API Key', 'error');
@@ -446,7 +471,9 @@ const App = {
         c.config.costos = parseFloat(document.getElementById('cfg-costos').value) || 0;
         c.config.inversion = parseFloat(document.getElementById('cfg-fee').value) || 0;
         c.config.lc = parseFloat(document.getElementById('cfg-lc').value) || 0;
-        PersistenceManager.save(); alert("Identidad Actualizada"); UIManager.showSection('dashboard');
+        c.config.valorCita = parseFloat(document.getElementById('cfg-cita').value) || 0;
+        c.config.valorProcedimiento = parseFloat(document.getElementById('cfg-proc').value) || 0;
+        PersistenceManager.save(); alert("Identidad Actualizada"); UIManager.showSection('config');
     },
     async handleOCR(e) {
         const file = e.target.files[0]; if (!file) return;
