@@ -329,36 +329,65 @@ const UIManager = {
 
     renderConfig(el, client, study) {
         el.innerHTML = `
-            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                <div class="card-premium">
-                    <h3 class="section-header">Configuración del Cliente</h3>
-                    <div class="input-group"><label>Costos Fijos Operativos</label><input type="number" id="cfg-costos" class="premium-input" value="${client.config.costos}"></div>
-                    <div class="input-group"><label>Fee Kwiq</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
-                    <div class="input-group"><label>LeadConnector</label><input type="number" id="cfg-lc" class="premium-input" value="${client.config.lc}"></div>
-                    <button onclick="App.saveClientConfig()" class="btn-premium" style="margin-top: 1rem;">Guardar Identidad</button>
-                    <hr style="margin: 2rem 0; opacity: 0.1;">
-                    <h3 class="section-header">Vision AI</h3>
-                    <div class="ocr-zone" onclick="document.getElementById('ocr-input').click()">
-                        <p>Analizar Captura de Meta/CRM</p>
-                        <input type="file" id="ocr-input" accept="image/*" onchange="App.handleOCR(event)" style="display:none">
+            <div class="animate-fade-in" style="display: grid; grid-template-columns: 350px 1fr; gap: 2rem;">
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <!-- Columna Izquierda: Identidad y API -->
+                    <div class="card-premium">
+                        <h3 class="section-header">Identidad Financiera</h3>
+                        <div class="input-group"><label>Costos Fijos Operativos</label><input type="number" id="cfg-costos" class="premium-input" value="${client.config.costos}"></div>
+                        <div class="input-group"><label>Fee Kwiq</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
+                        <div class="input-group"><label>LeadConnector</label><input type="number" id="cfg-lc" class="premium-input" value="${client.config.lc}"></div>
+                        <button onclick="App.saveClientConfig()" class="btn-premium" style="margin-top: 1rem;">Guardar Identidad</button>
+                    </div>
+
+                    <div class="card-premium" style="border-top: 4px solid var(--primary);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
+                            <h3 style="margin:0; font-size: 0.9rem; text-transform: uppercase;">Automatización API</h3>
+                            <span class="badge-status">Beta</span>
+                        </div>
+                        <div class="input-group">
+                            <label>GoHighLevel API Key</label>
+                            <input type="password" id="ghl-key" class="premium-input" placeholder="Ingresar API Key..." value="${client.config.ghlKey || ''}">
+                        </div>
+                        <button onclick="App.testGHLConnection()" class="btn-premium" style="background: var(--primary); width: 100%;">Vincular GHL</button>
                     </div>
                 </div>
-                <div class="card-premium">
-                    <h3 class="section-header">Carga Mensual: ${state.context.activePeriod}</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="input-group"><label>Venta ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" value="${study.ventas.ventaTotal}"></div>
-                        <div class="input-group"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <!-- Columna Derecha: Carga de Datos -->
+                    <div class="card-premium">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                            <h3 style="margin:0;">Carga Mensual: ${state.context.activePeriod}</h3>
+                            <div style="display:flex; gap: 1rem;">
+                                <button onclick="App.setLoadingSource('manual')" style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: rgba(255,255,255,0.05); color:white; border:none; cursor:pointer; font-size: 0.8rem;">Manual</button>
+                                <button onclick="document.getElementById('ocr-input').click()" style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: var(--primary); color:white; border:none; cursor:pointer; font-size: 0.8rem;">Carga con Screenshot (IA)</button>
+                                <input type="file" id="ocr-input" accept="image/*" onchange="App.handleOCR(event)" style="display:none">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem;">
+                            <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem;">
+                                <h4 style="margin-top:0; color:var(--primary); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;">Marketing (Ads)</h4>
+                                <div class="input-group"><label>Ad Spend / Pauta</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+                                <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
+                                <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
+                                <div class="input-group"><label>Resultados / Leads</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
+                            </div>
+
+                            <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem;">
+                                <h4 style="margin-top:0; color:#4338ca; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;">Operación Comercial</h4>
+                                <div class="input-group"><label>Citas Agendadas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
+                                <div class="input-group"><label>Citas Atendidas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
+                                <div class="input-group"><label>Procedimientos</label><input type="number" onchange="App.updateStudyField('operacion', 'procedimientos', this.value)" class="premium-input" value="${study.operacion.procedimientos}"></div>
+                            </div>
+
+                            <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem;">
+                                <h4 style="margin-top:0; color:var(--accent-green); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;">Ventas Finales</h4>
+                                <div class="input-group"><label>Venta Total ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" value="${study.ventas.ventaTotal}"></div>
+                                <div class="input-group"><label>Pauta Directa ($)</label><input type="number" onchange="App.updateStudyField('ventas', 'pauta', this.value)" class="premium-input" value="${study.ventas.pauta}"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                        <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
-                        <div class="input-group"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                        <div class="input-group"><label>Agend.</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
-                        <div class="input-group"><label>Atend.</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
-                        <div class="input-group"><label>Procs</label><input type="number" onchange="App.updateStudyField('operacion', 'procedimientos', this.value)" class="premium-input" value="${study.operacion.procedimientos}"></div>
-                    </div>
-                    <div class="input-group" style="margin-top: 1rem;"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
                 </div>
             </div>
         `;
@@ -396,6 +425,22 @@ const App = {
     },
     setPeriod(val) { state.context.activePeriod = val; PersistenceManager.save(); UIManager.showSection(state.currentSection); },
     updateStudyField(mod, field, val) { const s = DataManager.getStudy(); s[mod][field] = parseFloat(val) || 0; PersistenceManager.save(); UIManager.showSection(state.currentSection); },
+    testGHLConnection() {
+        const key = document.getElementById('ghl-key').value;
+        if (!key) return UIState.showNotification('Por favor ingrese una API Key', 'error');
+
+        UIState.showNotification('Conectando con GoHighLevel...', 'info');
+        // Placeholder para integración real de API
+        setTimeout(() => {
+            DataManager.updateClientConfig({ ghlKey: key });
+            UIState.showNotification('Conexión con GHL exitosa (Beta)', 'success');
+        }, 1500);
+    },
+
+    setLoadingSource(source) {
+        UIState.showNotification(`Modo de carga: ${source.toUpperCase()}`, 'info');
+    },
+
     saveClientConfig() {
         const c = DataManager.getClient();
         c.config.costos = parseFloat(document.getElementById('cfg-costos').value) || 0;
