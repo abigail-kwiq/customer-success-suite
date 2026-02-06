@@ -385,11 +385,13 @@ const UIManager = {
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
                         <!-- Módulo Marketing -->
                         <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
+                        <!-- Módulo Marketing -->
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
                             <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); margin-bottom: 0.5rem;">
                                 <ion-icon name="megaphone-outline" style="font-size: 1.2rem;"></ion-icon>
                                 <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Marketing</h4>
                             </div>
-                            <div class="input-group"><label>Inversión en Pauta ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
+                            <div class="input-group"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
                             <div class="input-group"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
                             <div class="input-group" style="background: rgba(99, 102, 241, 0.05); padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(99, 102, 241, 0.1);">
                                 <label style="color: var(--primary);">Costo por Resultado ($)</label>
@@ -417,16 +419,12 @@ const UIManager = {
                         <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                             <div style="display:flex; align-items:center; gap:0.5rem; color:var(--accent-green); margin-bottom: 0.5rem;">
                                 <ion-icon name="cash-outline" style="font-size: 1.2rem;"></ion-icon>
-                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Estado</h4>
+                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Ingresos</h4>
                             </div>
-                            <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 1rem;">
-                                <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; display: block; margin-bottom: 0.5rem;">Pauta Detectada</span>
-                                <div style="font-size: 1.25rem; font-weight: 700;">$${(study.marketing.adSpend || 0).toLocaleString()}</div>
-                            </div>
-                            <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border-radius: 1rem; border: 1px solid rgba(16, 185, 129, 0.1);">
-                                <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--accent-green); font-weight: 800; display: block; margin-bottom: 0.5rem;">Proyección Actual</span>
+                            <div style="margin-top: 1rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border-radius: 1rem; border: 1px solid rgba(16, 185, 129, 0.1);">
+                                <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--accent-green); font-weight: 800; display: block; margin-bottom: 0.5rem;">Proyección de Venta</span>
                                 <div style="font-size: 1.5rem; font-weight: 800;">$${(study.ventas.ventaTotal || 0).toLocaleString()}</div>
-                                <p style="font-size: 0.7rem; color: var(--text-muted); margin: 0.5rem 0 0 0;">Basado en actividad operativa y valores de identidad.</p>
+                                <p style="font-size: 0.7rem; color: var(--text-muted); margin: 0.5rem 0 0 0;">Calculado sobre actividad operativa y valores de identidad.</p>
                             </div>
                         </div>
                     </div>
