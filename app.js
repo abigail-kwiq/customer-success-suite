@@ -102,7 +102,7 @@ const FinanceManager = {
             totalMarketing, totalCosts, ventaTotal: v.ventaTotal, profit,
             profitMargin: v.ventaTotal > 0 ? (profit / v.ventaTotal * 100) : 0,
             roas: pauta > 0 ? (v.ventaTotal / pauta) : 0,
-            roe: totalCosts > 0 ? (profit / totalCosts) : 0,
+            roi: totalCosts > 0 ? (profit / totalCosts) : 0,
             assistRate: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
             cpl: m.resultados > 0 ? (pauta / m.resultados) : 0,
             // Métricas crudas para el dashboard
@@ -178,8 +178,8 @@ const UIManager = {
                     <p style="opacity: 0.9;">Utilidad Neta: <b>$${cur.profit.toLocaleString()}</b> | Margen: <b>${margin}%</b></p>
                 </div>
                 <div style="text-align: right;">
-                    <span style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase;">ROE (ROI)</span>
-                    <div style="font-size: 1.75rem; font-weight: 800;">${(cur.roe * 100).toFixed(1)}%</div>
+                    <span style="font-size: 0.75rem; opacity: 0.8; text-transform: uppercase;">ROI</span>
+                    <div style="font-size: 1.75rem; font-weight: 800;">${(cur.roi * 100).toFixed(1)}%</div>
                 </div>
             </div>
 
@@ -207,7 +207,7 @@ const UIManager = {
                     ${this.statCard('Utilidad', cur.profit, prev.profit, '$')}
                     ${this.statCard('Utilidad Acumulada', cumulativeProfit, 0, '$')}
                     ${this.statCard('ROAS', cur.roas.toFixed(2), prev.roas.toFixed(2), '', false, 'x')}
-                    ${this.statCard('ROE (ROI)', (cur.roe * 100).toFixed(1), (prev.roe * 100).toFixed(1), '', false, '%')}
+                    ${this.statCard('ROI', (cur.roi * 100).toFixed(1), (prev.roi * 100).toFixed(1), '', false, '%')}
                 </div>
             </div>
         `;
@@ -323,8 +323,8 @@ const UIManager = {
                         ${this.renderCostLine('Costos Operativos', m.clientCosts, m.totalCosts, 'var(--text-muted)')}
                         ${this.renderCostLine('Inversión Marketing', m.totalMarketing, m.totalCosts, 'var(--primary)')}
                         <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between;">
-                            <span style="font-size: 0.9rem; color: var(--text-muted);">ROI Real (ROE)</span>
-                            <b style="font-size: 1.25rem; color: var(--accent-green);">${(m.roe * 100).toFixed(1)}%</b>
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">ROI</span>
+                            <b style="font-size: 1.25rem; color: var(--accent-green);">${(m.roi * 100).toFixed(1)}%</b>
                         </div>
                     </div>
                 </div>
