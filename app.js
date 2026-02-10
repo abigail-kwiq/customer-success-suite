@@ -17,7 +17,7 @@ const state = {
                 '2026-01': {
                     marketing: { impresiones: 182710, alcance: 94000, resultados: 344, adSpend: 8986 },
                     operacion: { citasAgendadas: 80, citasAtendidas: 64, procedimientos: 12 },
-                    ventas: { ventaTotal: 145000, costos: 0, inversion: 0, leadConnector: 0, pauta: 0 }
+                    ventas: { ventaTotal: 145000, costos: 0, inversion: 0, leadConnector: 0, pauta: 0, tokensIA: 0 }
                 }
             }
         }
@@ -52,7 +52,7 @@ const DataManager = {
             c.estudios[period] = {
                 marketing: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
                 operacion: { citasAgendadas: 0, citasAtendidas: 0, procedimientos: 0 },
-                ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0 }
+                ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0, tokensIA: 0 }
             };
         }
         return c.estudios[period];
@@ -91,18 +91,20 @@ const FinanceManager = {
         const pauta = m.adSpend;
         const invQuick = v.inversion || clientConfig.inversion;
         const lcCosts = v.leadConnector || clientConfig.lc;
+        const tokensIA = v.tokensIA || clientConfig.tokensIA || 0;
         const clientCosts = v.costos || clientConfig.costos;
 
-        const totalMarketing = pauta + invQuick + lcCosts;
+        const serviceCosts = pauta + invQuick + lcCosts;
+        const totalMarketing = serviceCosts + tokensIA;
         const totalCosts = totalMarketing + clientCosts;
         const profit = v.ventaTotal - totalCosts;
 
         return {
-            pauta, invQuick, lcCosts, clientCosts,
-            totalMarketing, totalCosts, ventaTotal: v.ventaTotal, profit,
+            pauta, invQuick, lcCosts, tokensIA, clientCosts,
+            serviceCosts, totalMarketing, totalCosts, ventaTotal: v.ventaTotal, profit,
             profitMargin: v.ventaTotal > 0 ? (profit / v.ventaTotal * 100) : 0,
             roas: pauta > 0 ? (v.ventaTotal / pauta) : 0,
-            roi: totalCosts > 0 ? (profit / totalCosts) : 0,
+            roi: serviceCosts > 0 ? (profit / serviceCosts) : 0,
             assistRate: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
             cpl: m.resultados > 0 ? (pauta / m.resultados) : 0,
             // Métricas crudas para el dashboard
@@ -313,6 +315,7 @@ const UIManager = {
                         <div class="trend-row"><span>Costos del Cliente (Op)</span><b>$${m.clientCosts.toLocaleString()}</b></div>
                         <div class="trend-row"><span>Inversión Kwiq</span><b>$${m.invQuick.toLocaleString()}</b></div>
                         <div class="trend-row"><span>Lead Connector</span><b>$${m.lcCosts.toLocaleString()}</b></div>
+                        <div class="trend-row"><span>Tokens IA</span><b>$${m.tokensIA.toLocaleString()}</b></div>
                         <div class="trend-row" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);"><span>Pauta (Ad Spend)</span><b>$${m.pauta.toLocaleString()}</b></div>
                     </div>
                 </div>
@@ -348,6 +351,7 @@ const UIManager = {
                             <div class="input-group"><label>Costos Operativos</label><input type="number" id="cfg-costos" class="premium-input" value="${client.config.costos}"></div>
                             <div class="input-group"><label>Fee Kwiq</label><input type="number" id="cfg-fee" class="premium-input" value="${client.config.inversion}"></div>
                             <div class="input-group"><label>LeadConnector</label><input type="number" id="cfg-lc" class="premium-input" value="${client.config.lc}"></div>
+                            <div class="input-group"><label>Tokens IA</label><input type="number" id="cfg-tokens" class="premium-input" value="${client.config.tokensIA || 0}"></div>
                             
                             <div style="padding: 1rem; background: rgba(99, 102, 241, 0.05); border-radius: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.1);">
                                 <div class="input-group" style="margin-bottom: 0.75rem;"><label>Valor Cita ($)</label><input type="number" id="cfg-cita" class="premium-input" value="${client.config.valorCita || 0}"></div>
@@ -430,9 +434,13 @@ const UIManager = {
                             <div class="input-group">
                                 <label style="font-weight: 700;">Venta Total Real ($)</label>
                                 <input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" style="border-color: var(--accent-green); height: 3.5rem; font-size: 1.2rem;" value="${study.ventas.ventaTotal}">
-                                <p style="margin: 0.5rem 0 0 0; font-size: 0.65rem; color: var(--text-muted); line-height: 1.4;">
-                                    <b>Manual:</b> Indispensable para laboratorios o casos de precios variables. El sistema usará este valor para Utilidad, ROAS y ROI.
+                                <p style="margin: 0.5rem 0 0.75rem 0; font-size: 0.65rem; color: var(--text-muted); line-height: 1.4;">
+                                    <b>Manual:</b> Indispensable para laboratorios o casos de precios variables.
                                 </p>
+                            </div>
+                            <div class="input-group">
+                                <label>Gasto Tokens IA (Mes)</label>
+                                <input type="number" onchange="App.updateStudyField('ventas', 'tokensIA', this.value)" class="premium-input" value="${study.ventas.tokensIA || 0}">
                             </div>
                         </div>
                     </div>
@@ -467,7 +475,7 @@ const App = {
     setClient(name) {
         if (name === '+ NEW') {
             const n = prompt("Nombre:");
-            if (n) { state.clients[n] = { config: { costos: 0, inversion: 0, lc: 0 }, estudios: {} }; state.context.activeClient = n; }
+            if (n) { state.clients[n] = { config: { costos: 0, inversion: 0, lc: 0, tokensIA: 0 }, estudios: {} }; state.context.activeClient = n; }
         } else { state.context.activeClient = name; }
         PersistenceManager.save(); UIManager.showSection(state.currentSection);
     },
@@ -512,12 +520,18 @@ const App = {
 
     saveClientConfig() {
         const c = DataManager.getClient();
-        c.config.costos = parseFloat(document.getElementById('cfg-costos').value) || 0;
-        c.config.inversion = parseFloat(document.getElementById('cfg-fee').value) || 0;
-        c.config.lc = parseFloat(document.getElementById('cfg-lc').value) || 0;
-        c.config.valorCita = parseFloat(document.getElementById('cfg-cita').value) || 0;
-        c.config.valorProcedimiento = parseFloat(document.getElementById('cfg-proc').value) || 0;
-        PersistenceManager.save(); alert("Identidad Actualizada"); UIManager.showSection('config');
+        const updates = {
+            costos: parseFloat(document.getElementById('cfg-costos').value) || 0,
+            inversion: parseFloat(document.getElementById('cfg-fee').value) || 0,
+            lc: parseFloat(document.getElementById('cfg-lc').value) || 0,
+            tokensIA: parseFloat(document.getElementById('cfg-tokens').value) || 0,
+            valorCita: parseFloat(document.getElementById('cfg-cita').value) || 0,
+            valorProcedimiento: parseFloat(document.getElementById('cfg-proc').value) || 0,
+            ghlKey: document.getElementById('ghl-key').value
+        };
+        DataManager.updateClientConfig(updates);
+        PersistenceManager.save();
+        alert("Identidad Actualizada"); UIManager.showSection('config');
     },
     async handleOCR(e) {
         const file = e.target.files[0]; if (!file) return;
