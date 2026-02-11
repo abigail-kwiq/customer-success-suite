@@ -44,6 +44,11 @@ body {
   z-index: 50;
 }
 
+/* Modo GHL: Ocultar sidebar y expandir contenido */
+body.ghl-mode .sidebar {
+  display: none !important;
+}
+
 .logo {
   font-size: 1.5rem;
   font-weight: 800;
@@ -85,6 +90,13 @@ body {
   margin-left: 250px;
   padding: 2rem 3rem;
   max-width: 1400px;
+  transition: margin-left 0.3s ease;
+}
+
+body.ghl-mode .main-content {
+  margin-left: 0 !important;
+  padding: 1.5rem;
+  max-width: 100%;
 }
 
 header {

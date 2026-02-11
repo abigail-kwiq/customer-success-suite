@@ -471,7 +471,17 @@ const UIManager = {
 
 // --- 6. CONTROLLER ---
 const App = {
-    init() { PersistenceManager.load(); UIManager.showSection('dashboard'); },
+    init() {
+        PersistenceManager.load();
+
+        // Detección de GHL (Iframe)
+        if (window.self !== window.top) {
+            document.body.classList.add('ghl-mode');
+            console.log("Modo GHL Activo: Interfaz Optimizada para Iframe");
+        }
+
+        UIManager.showSection('dashboard');
+    },
     setClient(name) {
         if (name === '+ NEW') {
             const n = prompt("Nombre:");
