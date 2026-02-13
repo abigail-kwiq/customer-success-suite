@@ -52,7 +52,24 @@
                 <p id="view-subtitle">Resumen mensual de rendimiento • Enero 2026</p>
             </div>
             <div class="header-actions">
-                <span class="badge badge-blue">Sincronizado: Justo ahora</span>
+                <nav class="top-nav">
+                    <button class="top-nav-item active" onclick="showSection('dashboard')">
+                        <ion-icon name="grid-outline"></ion-icon> Dashboard
+                    </button>
+                    <button class="top-nav-item" onclick="showSection('marketing')">
+                        <ion-icon name="megaphone-outline"></ion-icon> Marketing
+                    </button>
+                    <button class="top-nav-item" onclick="showSection('operaciones')">
+                        <ion-icon name="briefcase-outline"></ion-icon> Operaciones
+                    </button>
+                    <button class="top-nav-item" onclick="showSection('ventas')">
+                        <ion-icon name="cash-outline"></ion-icon> Finanzas
+                    </button>
+                    <button class="top-nav-item" onclick="showSection('config')">
+                        <ion-icon name="settings-outline"></ion-icon> Conexiones
+                    </button>
+                </nav>
+                <div id="context-selector-target"></div>
             </div>
         </header>
 

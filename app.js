@@ -126,8 +126,13 @@ const UIManager = {
 
         // UI cleanup
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.top-nav-item').forEach(i => i.classList.remove('active'));
+
         const nav = Array.from(document.querySelectorAll('.nav-item')).find(i => i.getAttribute('onclick')?.includes(id));
         if (nav) nav.classList.add('active');
+
+        const topNav = Array.from(document.querySelectorAll('.top-nav-item')).find(i => i.getAttribute('onclick')?.includes(id));
+        if (topNav) topNav.classList.add('active');
 
         const client = DataManager.getClient();
         const curStudy = DataManager.getStudy();
@@ -157,9 +162,9 @@ const UIManager = {
     },
 
     renderContextSelector() {
-        const header = document.querySelector('.header-actions');
-        if (!header) return;
-        header.innerHTML = `
+        const target = document.getElementById('context-selector-target');
+        if (!target) return;
+        target.innerHTML = `
             <div style="display:flex; gap:0.5rem; align-items:center;">
                 <select onchange="App.setClient(this.value)" class="premium-input" style="padding:0.4rem; font-size:0.75rem;">
                     ${Object.keys(state.clients).map(c => `<option value="${c}" ${c === state.context.activeClient ? 'selected' : ''}>${c}</option>`).join('')}
