@@ -318,10 +318,10 @@ const UIManager = {
                 </div>
 
                 <!-- Breakdown TikTok -->
-                <div class="card-premium" style="border-left: 4px solid #000000; padding: 1.25rem;">
+                <div class="card-premium" style="border-left: 4px solid #25f4ee; padding: 1.25rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                        <h4 style="font-size:0.7rem; color:#000000; text-transform:uppercase;">TikTok Ads Performance</h4>
-                        <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#000000;"></ion-icon>
+                        <h4 style="font-size:0.7rem; color:#25f4ee; text-transform:uppercase;">TikTok Ads Performance</h4>
+                        <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#25f4ee;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                         <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
@@ -527,10 +527,10 @@ const UIManager = {
                             </div>
 
                             <!-- Bloque TIKTOK ADS -->
-                            <div style="padding: 1rem; background: rgba(0, 0, 0, 0.05); border-radius: 0.75rem; border: 1px solid rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="padding: 1rem; background: rgba(37, 244, 238, 0.05); border-radius: 0.75rem; border: 1px solid rgba(37, 244, 238, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                                    <span style="font-size: 0.65rem; font-weight: 700; color: #000000; text-transform: uppercase;">TikTok Ads</span>
-                                    <ion-icon name="logo-tiktok" style="color: #000000;"></ion-icon>
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #25f4ee; text-transform: uppercase;">TikTok Ads</span>
+                                    <ion-icon name="logo-tiktok" style="color: #25f4ee;"></ion-icon>
                                 </div>
                                 <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok?.adSpend || 0}"></div>
                                 <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados || 0}"></div>
@@ -606,7 +606,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log("Execution Compass v10.1.2 - Full Multi-Channel Active");
+        console.log("Execution Compass v10.2.0 - Aesthetic Polish Active");
         PersistenceManager.load();
 
         // Detección de GHL (Iframe)
