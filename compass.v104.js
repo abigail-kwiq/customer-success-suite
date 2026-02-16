@@ -202,7 +202,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge">v10.3.0</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge" style="background:#25f4ee; color:#000;">v10.4.0 NUCLEO</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -607,7 +607,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v10.3.0 [${new Date().getTime()}] - Sync Fix Active`);
+        console.log(`Execution Compass v10.4.0 [NUCLEO] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Inject Critical Styles for Mobile/Cache fixes
