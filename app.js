@@ -43,20 +43,21 @@ const PersistenceManager = {
             if (parsed.context) state.context = parsed.context;
             if (parsed.clients) {
                 state.clients = parsed.clients;
-                // MIGRACIÓN FORZADA v9.3 - Normalizar todos los estudios
+                // MIGRACIÓN FORZADA v10.0 - Normalizar todos los estudios
                 Object.values(state.clients).forEach(client => {
                     Object.keys(client.estudios).forEach(period => {
                         const study = client.estudios[period];
-                        if (!study.marketing || !study.marketing.meta) {
+                        if (!study.marketing || !study.marketing.meta || !study.marketing.tiktok) {
                             const old = study.marketing || {};
                             study.marketing = {
-                                meta: {
+                                meta: study.marketing?.meta || {
                                     adSpend: old.adSpend || 0,
                                     resultados: old.resultados || 0,
                                     alcance: old.alcance || 0,
                                     impresiones: old.impresiones || 0
                                 },
-                                google: { adSpend: 0, resultados: 0, alcance: 0, impresiones: 0 }
+                                google: study.marketing?.google || { adSpend: 0, resultados: 0, alcance: 0, impresiones: 0 },
+                                tiktok: study.marketing?.tiktok || { adSpend: 0, resultados: 0, alcance: 0, impresiones: 0 }
                             };
                         }
                     });
@@ -75,7 +76,8 @@ const DataManager = {
             c.estudios[period] = {
                 marketing: {
                     meta: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
-                    google: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 }
+                    google: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
+                    tiktok: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 }
                 },
                 operacion: { citasAgendadas: 0, citasAtendidas: 0, procedimientos: 0 },
                 ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0, tokensIA: 0 }
@@ -100,6 +102,12 @@ const DataManager = {
                 resultados: (m.google ? m.google.resultados : 0) || 0,
                 alcance: (m.google ? m.google.alcance : 0) || 0,
                 impresiones: (m.google ? m.google.impresiones : 0) || 0
+            },
+            tiktok: {
+                adSpend: (m.tiktok ? m.tiktok.adSpend : 0) || 0,
+                resultados: (m.tiktok ? m.tiktok.resultados : 0) || 0,
+                alcance: (m.tiktok ? m.tiktok.alcance : 0) || 0,
+                impresiones: (m.tiktok ? m.tiktok.impresiones : 0) || 0
             }
         };
     },
@@ -132,9 +140,10 @@ const DataManager = {
 // --- 4. FINANCIAL ENGINE ---
 const FinanceManager = {
     calculate(study, clientConfig) {
-        const { meta, google } = DataManager.getMarketing(study);
+        const { meta, google, tiktok } = DataManager.getMarketing(study);
         const v = study.ventas;
-        const pauta = (meta.adSpend || 0) + (google.adSpend || 0);
+        const pauta = (meta.adSpend || 0) + (google.adSpend || 0) + (tiktok.adSpend || 0);
+
         const invQuick = v.inversion || clientConfig.inversion;
         const lcCosts = v.leadConnector || clientConfig.lc;
         const tokensIA = v.tokensIA || clientConfig.tokensIA || 0;
@@ -146,7 +155,7 @@ const FinanceManager = {
         const profit = v.ventaTotal - totalCosts;
 
         // Resultados Agregados
-        const totalResultados = (meta.resultados || 0) + (google.resultados || 0);
+        const totalResultados = (meta.resultados || 0) + (google.resultados || 0) + (tiktok.resultados || 0);
 
         return {
             pauta, invQuick, lcCosts, tokensIA, clientCosts,
@@ -157,14 +166,14 @@ const FinanceManager = {
             assistRate: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
             cpl: totalResultados > 0 ? (pauta / totalResultados) : 0,
             // Métricas crudas (Suma)
-            alcance: (meta.alcance || 0) + (google.alcance || 0),
-            impresiones: (meta.impresiones || 0) + (google.impresiones || 0),
+            alcance: (meta.alcance || 0) + (google.alcance || 0) + (tiktok.alcance || 0),
+            impresiones: (meta.impresiones || 0) + (google.impresiones || 0) + (tiktok.impresiones || 0),
             resultados: totalResultados,
             citasAgendadas: study.operacion.citasAgendadas || 0,
             citasAtendidas: study.operacion.citasAtendidas || 0,
             procedimientos: study.operacion.procedimientos || 0,
             // Detalle por canal para vistas profundas
-            meta, google
+            meta, google, tiktok
         };
     }
 };
@@ -281,30 +290,43 @@ const UIManager = {
                 ${this.statCard('Ad Spend Total', metrics.pauta, 0, '$', true)}
             </div>
 
-            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div class="animate-fade-in" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
                 <!-- Breakdown Meta -->
-                <div class="card-premium" style="border-left: 4px solid #1877f2;">
+                <div class="card-premium" style="border-left: 4px solid #1877f2; padding: 1.25rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                         <h4 style="font-size:0.7rem; color:#1877f2; text-transform:uppercase;">Meta Ads Performance</h4>
                         <ion-icon name="logo-facebook" style="font-size:1.5rem; color:#1877f2;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.2rem;">$${metrics.meta.adSpend.toLocaleString()}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.2rem;">${metrics.meta.resultados}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.2rem;">$${metrics.meta.resultados > 0 ? (metrics.meta.adSpend / metrics.meta.resultados).toFixed(2) : '0.00'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.meta.adSpend.toLocaleString()}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.meta.resultados}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.meta.resultados > 0 ? (metrics.meta.adSpend / metrics.meta.resultados).toFixed(2) : '0.00'}</b></div>
                     </div>
                 </div>
 
                 <!-- Breakdown Google -->
-                <div class="card-premium" style="border-left: 4px solid #db4437;">
+                <div class="card-premium" style="border-left: 4px solid #db4437; padding: 1.25rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                         <h4 style="font-size:0.7rem; color:#db4437; text-transform:uppercase;">Google Ads Performance</h4>
                         <ion-icon name="logo-google" style="font-size:1.5rem; color:#db4437;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.2rem;">$${metrics.google.adSpend.toLocaleString()}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.2rem;">${metrics.google.resultados}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.2rem;">$${metrics.google.resultados > 0 ? (metrics.google.adSpend / metrics.google.resultados).toFixed(2) : '0.00'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.google.adSpend.toLocaleString()}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.google.resultados}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.google.resultados > 0 ? (metrics.google.adSpend / metrics.google.resultados).toFixed(2) : '0.00'}</b></div>
+                    </div>
+                </div>
+
+                <!-- Breakdown TikTok -->
+                <div class="card-premium" style="border-left: 4px solid #000000; padding: 1.25rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <h4 style="font-size:0.7rem; color:#000000; text-transform:uppercase;">TikTok Ads Performance</h4>
+                        <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#000000;"></ion-icon>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.tiktok.adSpend.toLocaleString()}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.tiktok.resultados}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.tiktok.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
                     </div>
                 </div>
             </div>
@@ -502,6 +524,19 @@ const UIManager = {
                                 <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.google.resultados > 0 ? (study.marketing.google.adSpend / study.marketing.google.resultados).toFixed(2) : 0}"></div>
                                 <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.google', 'alcance', this.value)" class="premium-input" value="${study.marketing.google.alcance || 0}"></div>
                                 <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.google', 'impresiones', this.value)" class="premium-input" value="${study.marketing.google.impresiones || 0}"></div>
+                            </div>
+
+                            <!-- Bloque TIKTOK ADS -->
+                            <div style="padding: 1rem; background: rgba(0, 0, 0, 0.05); border-radius: 0.75rem; border: 1px solid rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #000000; text-transform: uppercase;">TikTok Ads</span>
+                                    <ion-icon name="logo-tiktok" style="color: #000000;"></ion-icon>
+                                </div>
+                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok.adSpend || 0}"></div>
+                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok.resultados || 0}"></div>
+                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.tiktok.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}"></div>
+                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" class="premium-input" value="${study.marketing.tiktok.alcance || 0}"></div>
+                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" class="premium-input" value="${study.marketing.tiktok.impresiones || 0}"></div>
                             </div>
                         </div>
 
