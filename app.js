@@ -15,7 +15,10 @@ const state = {
             config: { costos: 32000, inversion: 6361, lc: 2568, valorCita: 1000, valorProcedimiento: 12000 },
             estudios: {
                 '2026-01': {
-                    marketing: { impresiones: 182710, alcance: 94000, resultados: 344, adSpend: 8986 },
+                    marketing: {
+                        meta: { impresiones: 182710, alcance: 94000, resultados: 344, adSpend: 8986 },
+                        google: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 }
+                    },
                     operacion: { citasAgendadas: 80, citasAtendidas: 64, procedimientos: 12 },
                     ventas: { ventaTotal: 145000, costos: 0, inversion: 0, leadConnector: 0, pauta: 0, tokensIA: 0 }
                 }
@@ -50,7 +53,10 @@ const DataManager = {
         const c = this.getClient();
         if (!c.estudios[period]) {
             c.estudios[period] = {
-                marketing: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
+                marketing: {
+                    meta: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 },
+                    google: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 }
+                },
                 operacion: { citasAgendadas: 0, citasAtendidas: 0, procedimientos: 0 },
                 ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0, tokensIA: 0 }
             };
@@ -87,8 +93,12 @@ const DataManager = {
 const FinanceManager = {
     calculate(study, clientConfig) {
         const m = study.marketing;
+        // Migración al vuelo si es estructura vieja
+        const meta = m.meta || m;
+        const google = m.google || { adSpend: 0, resultados: 0, alcance: 0, impresiones: 0 };
+
         const v = study.ventas;
-        const pauta = m.adSpend;
+        const pauta = (meta.adSpend || 0) + (google.adSpend || 0);
         const invQuick = v.inversion || clientConfig.inversion;
         const lcCosts = v.leadConnector || clientConfig.lc;
         const tokensIA = v.tokensIA || clientConfig.tokensIA || 0;
@@ -99,6 +109,9 @@ const FinanceManager = {
         const totalCosts = totalMarketing + clientCosts;
         const profit = v.ventaTotal - totalCosts;
 
+        // Resultados Agregados
+        const totalResultados = (meta.resultados || 0) + (google.resultados || 0);
+
         return {
             pauta, invQuick, lcCosts, tokensIA, clientCosts,
             serviceCosts, totalMarketing, totalCosts, ventaTotal: v.ventaTotal, profit,
@@ -106,14 +119,16 @@ const FinanceManager = {
             roas: pauta > 0 ? (v.ventaTotal / pauta) : 0,
             roi: serviceCosts > 0 ? (profit / serviceCosts) : 0,
             assistRate: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
-            cpl: m.resultados > 0 ? (pauta / m.resultados) : 0,
-            // Métricas crudas para el dashboard
-            alcance: m.alcance || 0,
-            impresiones: m.impresiones || 0,
-            resultados: m.resultados || 0,
+            cpl: totalResultados > 0 ? (pauta / totalResultados) : 0,
+            // Métricas crudas (Suma)
+            alcance: (meta.alcance || 0) + (google.alcance || 0),
+            impresiones: (meta.impresiones || 0) + (google.impresiones || 0),
+            resultados: totalResultados,
             citasAgendadas: study.operacion.citasAgendadas || 0,
             citasAtendidas: study.operacion.citasAtendidas || 0,
-            procedimientos: study.operacion.procedimientos || 0
+            procedimientos: study.operacion.procedimientos || 0,
+            // Detalle por canal para vistas profundas
+            meta, google
         };
     }
 };
@@ -221,23 +236,49 @@ const UIManager = {
     },
 
     renderMarketing(el, cur, prev, metrics) {
-        const m = cur.marketing;
-        const pm = prev ? prev.marketing : m;
         el.innerHTML = `
             <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Alcance', m.alcance, pm.alcance)}
-                ${this.statCard('Impresiones', m.impresiones, pm.impresiones)}
-                ${this.statCard('Leads (Resultados)', m.resultados, pm.resultados)}
-                ${this.statCard('Costo por Resultado', metrics.cpl, 0, '$', true)}
-                ${this.statCard('Ad Spend', m.adSpend, pm.adSpend, '$', true)}
+                ${this.statCard('Alcance Total', metrics.alcance, prev ? FinanceManager.calculate(prev, DataManager.getClient().config).alcance : metrics.alcance)}
+                ${this.statCard('Impresiones Totales', metrics.impresiones, prev ? FinanceManager.calculate(prev, DataManager.getClient().config).impresiones : metrics.impresiones)}
+                ${this.statCard('Leads Totales', metrics.resultados, prev ? FinanceManager.calculate(prev, DataManager.getClient().config).resultados : metrics.resultados)}
+                ${this.statCard('CPL Global', metrics.cpl, 0, '$', true)}
+                ${this.statCard('Ad Spend Total', metrics.pauta, 0, '$', true)}
+            </div>
+
+            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <!-- Breakdown Meta -->
+                <div class="card-premium" style="border-left: 4px solid #1877f2;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <h4 style="font-size:0.7rem; color:#1877f2; text-transform:uppercase;">Meta Ads Performance</h4>
+                        <ion-icon name="logo-facebook" style="font-size:1.5rem; color:#1877f2;"></ion-icon>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.2rem;">$${metrics.meta.adSpend.toLocaleString()}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.2rem;">${metrics.meta.resultados}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.2rem;">$${metrics.meta.resultados > 0 ? (metrics.meta.adSpend / metrics.meta.resultados).toFixed(2) : '0.00'}</b></div>
+                    </div>
+                </div>
+
+                <!-- Breakdown Google -->
+                <div class="card-premium" style="border-left: 4px solid #db4437;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <h4 style="font-size:0.7rem; color:#db4437; text-transform:uppercase;">Google Ads Performance</h4>
+                        <ion-icon name="logo-google" style="font-size:1.5rem; color:#db4437;"></ion-icon>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.2rem;">$${metrics.google.adSpend.toLocaleString()}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.2rem;">${metrics.google.resultados}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.2rem;">$${metrics.google.resultados > 0 ? (metrics.google.adSpend / metrics.google.resultados).toFixed(2) : '0.00'}</b></div>
+                    </div>
+                </div>
             </div>
 
             <div class="animate-fade-in" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;">
                 <div class="card-premium" style="min-height: 400px; display: flex; flex-direction: column;">
                     <h3 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2rem;">Rendimiento Audiencia e Inversión</h3>
                     <div style="flex: 1; display:flex; align-items: flex-end; justify-content: space-around; padding: 2rem; background: rgba(0,0,0,0.02); border-radius: 1.5rem;">
-                        ${this.renderChartBar('Alcance', m.alcance, 100000, 'var(--primary)')}
-                        ${this.renderChartBar('Impresiones', m.impresiones, 200000, '#4338ca')}
+                        ${this.renderChartBar('Alcance', metrics.alcance, 100000, 'var(--primary)')}
+                        ${this.renderChartBar('Impresiones', metrics.impresiones, 200000, '#4338ca')}
                         ${this.renderChartBar('Venta', cur.ventas.ventaTotal, 200000, '#10b981')}
                     </div>
                 </div>
@@ -252,10 +293,6 @@ const UIManager = {
                     </div>
                 </div>
             </div>
-            <style>
-                @keyframes growUp { from { height: 0; } }
-                .chart-bar { animation: growUp 1.5s ease-out; }
-            </style>
         `;
     },
 
@@ -398,17 +435,32 @@ const UIManager = {
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-                        <!-- Módulo Marketing -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
+                        <!-- Módulo Marketing Multi-Canal -->
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
                             <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); margin-bottom: 0.5rem;">
                                 <ion-icon name="megaphone-outline" style="font-size: 1.2rem;"></ion-icon>
                                 <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Marketing</h4>
                             </div>
-                            <div class="input-group"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing', 'adSpend', this.value)" class="premium-input" value="${study.marketing.adSpend}"></div>
-                            <div class="input-group"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing', 'resultados', this.value)" class="premium-input" value="${study.marketing.resultados}"></div>
-                            <div class="input-group"><label>Costo por Resultado ($)</label><input type="number" step="0.01" onchange="App.updateStudyField('marketing', 'cpl', this.value)" class="premium-input" value="${study.marketing.resultados > 0 ? (study.marketing.adSpend / study.marketing.resultados).toFixed(2) : 0}"></div>
-                            <div class="input-group"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing', 'alcance', this.value)" class="premium-input" value="${study.marketing.alcance}"></div>
-                            <div class="input-group"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing', 'impresiones', this.value)" class="premium-input" value="${study.marketing.impresiones}"></div>
+
+                            <!-- Canal: Meta Ads -->
+                            <div style="padding: 1rem; background: rgba(24, 119, 242, 0.03); border-radius: 0.75rem; border: 1px solid rgba(24, 119, 242, 0.05);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #1877f2; text-transform: uppercase;">Meta Ads</span>
+                                    <ion-icon name="logo-facebook" style="color: #1877f2;"></ion-icon>
+                                </div>
+                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'adSpend', this.value)" class="premium-input" value="${study.marketing.meta.adSpend}"></div>
+                                <div class="input-group small"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'resultados', this.value)" class="premium-input" value="${study.marketing.meta.resultados}"></div>
+                            </div>
+
+                            <!-- Canal: Google Ads -->
+                            <div style="padding: 1rem; background: rgba(219, 68, 55, 0.03); border-radius: 0.75rem; border: 1px solid rgba(219, 68, 55, 0.05);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #db4437; text-transform: uppercase;">Google Ads</span>
+                                    <ion-icon name="logo-google" style="color: #db4437;"></ion-icon>
+                                </div>
+                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'adSpend', this.value)" class="premium-input" value="${study.marketing.google.adSpend}"></div>
+                                <div class="input-group small"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing.google', 'resultados', this.value)" class="premium-input" value="${study.marketing.google.resultados}"></div>
+                            </div>
                         </div>
 
                         <!-- Módulo Operativa -->
@@ -500,10 +552,9 @@ const App = {
         const c = DataManager.getClient();
         const numVal = parseFloat(val) || 0;
 
-        if (mod === 'marketing' && field === 'cpl') {
-            if (s.marketing.resultados > 0) {
-                s.marketing.adSpend = Math.round(numVal * s.marketing.resultados);
-            }
+        if (mod.includes('.')) {
+            const [parent, child] = mod.split('.');
+            s[parent][child][field] = numVal;
         } else {
             s[mod][field] = numVal;
         }
