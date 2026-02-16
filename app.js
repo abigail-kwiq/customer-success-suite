@@ -443,23 +443,29 @@ const UIManager = {
                             </div>
 
                             <!-- Canal: Meta Ads -->
-                            <div style="padding: 1rem; background: rgba(24, 119, 242, 0.03); border-radius: 0.75rem; border: 1px solid rgba(24, 119, 242, 0.05);">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                            <div style="padding: 1rem; background: rgba(24, 119, 242, 0.03); border-radius: 0.75rem; border: 1px solid rgba(24, 119, 242, 0.05); display: flex; flex-direction: column; gap: 0.75rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
                                     <span style="font-size: 0.65rem; font-weight: 700; color: #1877f2; text-transform: uppercase;">Meta Ads</span>
                                     <ion-icon name="logo-facebook" style="color: #1877f2;"></ion-icon>
                                 </div>
                                 <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'adSpend', this.value)" class="premium-input" value="${study.marketing.meta.adSpend}"></div>
-                                <div class="input-group small"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'resultados', this.value)" class="premium-input" value="${study.marketing.meta.resultados}"></div>
+                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'resultados', this.value)" class="premium-input" value="${study.marketing.meta.resultados}"></div>
+                                <div class="input-group small"><label>CPL ($)</label><input type="number" step="0.01" class="premium-input" readonly value="${study.marketing.meta.resultados > 0 ? (study.marketing.meta.adSpend / study.marketing.meta.resultados).toFixed(2) : 0}"></div>
+                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'alcance', this.value)" class="premium-input" value="${study.marketing.meta.alcance || 0}"></div>
+                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'impresiones', this.value)" class="premium-input" value="${study.marketing.meta.impresiones || 0}"></div>
                             </div>
 
                             <!-- Canal: Google Ads -->
-                            <div style="padding: 1rem; background: rgba(219, 68, 55, 0.03); border-radius: 0.75rem; border: 1px solid rgba(219, 68, 55, 0.05);">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                            <div style="padding: 1rem; background: rgba(219, 68, 55, 0.03); border-radius: 0.75rem; border: 1px solid rgba(219, 68, 55, 0.05); display: flex; flex-direction: column; gap: 0.75rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
                                     <span style="font-size: 0.65rem; font-weight: 700; color: #db4437; text-transform: uppercase;">Google Ads</span>
                                     <ion-icon name="logo-google" style="color: #db4437;"></ion-icon>
                                 </div>
                                 <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'adSpend', this.value)" class="premium-input" value="${study.marketing.google.adSpend}"></div>
-                                <div class="input-group small"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing.google', 'resultados', this.value)" class="premium-input" value="${study.marketing.google.resultados}"></div>
+                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'resultados', this.value)" class="premium-input" value="${study.marketing.google.resultados}"></div>
+                                <div class="input-group small"><label>CPL ($)</label><input type="number" step="0.01" class="premium-input" readonly value="${study.marketing.google.resultados > 0 ? (study.marketing.google.adSpend / study.marketing.google.resultados).toFixed(2) : 0}"></div>
+                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.google', 'alcance', this.value)" class="premium-input" value="${study.marketing.google.alcance || 0}"></div>
+                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.google', 'impresiones', this.value)" class="premium-input" value="${study.marketing.google.impresiones || 0}"></div>
                             </div>
                         </div>
 
