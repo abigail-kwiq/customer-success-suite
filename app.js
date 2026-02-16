@@ -201,7 +201,8 @@ const UIManager = {
         const prevMetrics = prevStudy ? FinanceManager.calculate(prevStudy, client.config) : curMetrics;
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
-        document.getElementById('view-subtitle').innerText = `${state.context.activeClient} • ${state.context.activePeriod}`;
+        const subtitle = document.getElementById('view-subtitle');
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge">v10.3.0</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -527,10 +528,10 @@ const UIManager = {
                             </div>
 
                             <!-- Bloque TIKTOK ADS -->
-                            <div style="padding: 1rem; background: rgba(37, 244, 238, 0.05); border-radius: 0.75rem; border: 1px solid rgba(37, 244, 238, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div class="tiktok-bg" style="padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(37, 244, 238, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                                    <span style="font-size: 0.65rem; font-weight: 700; color: #25f4ee; text-transform: uppercase;">TikTok Ads</span>
-                                    <ion-icon name="logo-tiktok" style="color: #25f4ee;"></ion-icon>
+                                    <span class="tiktok-accent" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">TikTok Ads</span>
+                                    <ion-icon name="logo-tiktok" class="tiktok-accent"></ion-icon>
                                 </div>
                                 <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok?.adSpend || 0}"></div>
                                 <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados || 0}"></div>
@@ -606,8 +607,27 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log("Execution Compass v10.2.0 - Aesthetic Polish Active");
+        console.log(`Execution Compass v10.3.0 [${new Date().getTime()}] - Sync Fix Active`);
         PersistenceManager.load();
+
+        // Inject Critical Styles for Mobile/Cache fixes
+        const style = document.createElement('style');
+        style.textContent = `
+            .tiktok-accent { color: #25f4ee !important; }
+            .tiktok-border { border-color: #25f4ee !important; }
+            .tiktok-bg { background: rgba(37, 244, 238, 0.05) !important; }
+            .version-badge { 
+                background: var(--primary); 
+                color: white; 
+                padding: 2px 8px; 
+                border-radius: 4px; 
+                font-size: 10px; 
+                font-weight: 800;
+                margin-left: 10px;
+                vertical-align: middle;
+            }
+        `;
+        document.head.appendChild(style);
 
         // Detección de GHL (Iframe)
         if (window.self !== window.top) {
