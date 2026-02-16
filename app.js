@@ -298,9 +298,9 @@ const UIManager = {
                         <ion-icon name="logo-facebook" style="font-size:1.5rem; color:#1877f2;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.meta.adSpend.toLocaleString()}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.meta.resultados}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.meta.resultados > 0 ? (metrics.meta.adSpend / metrics.meta.resultados).toFixed(2) : '0.00'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.meta?.adSpend.toLocaleString() || '0'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.meta?.resultados || '0'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.meta?.resultados > 0 ? (metrics.meta.adSpend / metrics.meta.resultados).toFixed(2) : '0.00'}</b></div>
                     </div>
                 </div>
 
@@ -311,9 +311,9 @@ const UIManager = {
                         <ion-icon name="logo-google" style="font-size:1.5rem; color:#db4437;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.google.adSpend.toLocaleString()}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.google.resultados}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.google.resultados > 0 ? (metrics.google.adSpend / metrics.google.resultados).toFixed(2) : '0.00'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.google?.adSpend.toLocaleString() || '0'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.google?.resultados || '0'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.google?.resultados > 0 ? (metrics.google.adSpend / metrics.google.resultados).toFixed(2) : '0.00'}</b></div>
                     </div>
                 </div>
 
@@ -324,9 +324,9 @@ const UIManager = {
                         <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#000000;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.tiktok.adSpend.toLocaleString()}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.tiktok.resultados}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.tiktok.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.tiktok?.resultados || '0'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.tiktok?.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
                     </div>
                 </div>
             </div>
@@ -506,11 +506,11 @@ const UIManager = {
                                     <span style="font-size: 0.65rem; font-weight: 700; color: #1877f2; text-transform: uppercase;">Meta Ads</span>
                                     <ion-icon name="logo-facebook" style="color: #1877f2;"></ion-icon>
                                 </div>
-                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'adSpend', this.value)" class="premium-input" value="${study.marketing.meta.adSpend || 0}"></div>
-                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'resultados', this.value)" class="premium-input" value="${study.marketing.meta.resultados || 0}"></div>
-                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.meta.resultados > 0 ? (study.marketing.meta.adSpend / study.marketing.meta.resultados).toFixed(2) : 0}"></div>
-                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'alcance', this.value)" class="premium-input" value="${study.marketing.meta.alcance || 0}"></div>
-                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'impresiones', this.value)" class="premium-input" value="${study.marketing.meta.impresiones || 0}"></div>
+                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'adSpend', this.value)" class="premium-input" value="${study.marketing.meta?.adSpend || 0}"></div>
+                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'resultados', this.value)" class="premium-input" value="${study.marketing.meta?.resultados || 0}"></div>
+                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.meta?.resultados > 0 ? (study.marketing.meta.adSpend / study.marketing.meta.resultados).toFixed(2) : 0}"></div>
+                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'alcance', this.value)" class="premium-input" value="${study.marketing.meta?.alcance || 0}"></div>
+                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'impresiones', this.value)" class="premium-input" value="${study.marketing.meta?.impresiones || 0}"></div>
                             </div>
 
                             <!-- Bloque GOOGLE ADS -->
@@ -519,11 +519,11 @@ const UIManager = {
                                     <span style="font-size: 0.65rem; font-weight: 700; color: #db4437; text-transform: uppercase;">Google Ads</span>
                                     <ion-icon name="logo-google" style="color: #db4437;"></ion-icon>
                                 </div>
-                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'adSpend', this.value)" class="premium-input" value="${study.marketing.google.adSpend || 0}"></div>
-                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'resultados', this.value)" class="premium-input" value="${study.marketing.google.resultados || 0}"></div>
-                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.google.resultados > 0 ? (study.marketing.google.adSpend / study.marketing.google.resultados).toFixed(2) : 0}"></div>
-                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.google', 'alcance', this.value)" class="premium-input" value="${study.marketing.google.alcance || 0}"></div>
-                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.google', 'impresiones', this.value)" class="premium-input" value="${study.marketing.google.impresiones || 0}"></div>
+                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'adSpend', this.value)" class="premium-input" value="${study.marketing.google?.adSpend || 0}"></div>
+                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'resultados', this.value)" class="premium-input" value="${study.marketing.google?.resultados || 0}"></div>
+                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.google?.resultados > 0 ? (study.marketing.google.adSpend / study.marketing.google.resultados).toFixed(2) : 0}"></div>
+                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.google', 'alcance', this.value)" class="premium-input" value="${study.marketing.google?.alcance || 0}"></div>
+                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.google', 'impresiones', this.value)" class="premium-input" value="${study.marketing.google?.impresiones || 0}"></div>
                             </div>
 
                             <!-- Bloque TIKTOK ADS -->
@@ -532,11 +532,11 @@ const UIManager = {
                                     <span style="font-size: 0.65rem; font-weight: 700; color: #000000; text-transform: uppercase;">TikTok Ads</span>
                                     <ion-icon name="logo-tiktok" style="color: #000000;"></ion-icon>
                                 </div>
-                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok.adSpend || 0}"></div>
-                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok.resultados || 0}"></div>
-                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.tiktok.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}"></div>
-                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" class="premium-input" value="${study.marketing.tiktok.alcance || 0}"></div>
-                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" class="premium-input" value="${study.marketing.tiktok.impresiones || 0}"></div>
+                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok?.adSpend || 0}"></div>
+                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados || 0}"></div>
+                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}"></div>
+                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" class="premium-input" value="${study.marketing.tiktok?.alcance || 0}"></div>
+                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" class="premium-input" value="${study.marketing.tiktok?.impresiones || 0}"></div>
                             </div>
                         </div>
 
@@ -606,6 +606,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
+        console.log("Execution Compass v10.1.2 - Full Multi-Channel Active");
         PersistenceManager.load();
 
         // Detección de GHL (Iframe)
