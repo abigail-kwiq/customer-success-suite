@@ -202,7 +202,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge">v10.5.0 ULTRA-CYAN</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge" style="background:#25f4ee !important; color:#000 !important; font-weight:800;">v10.6.0 FORCE-CIAN</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -319,15 +319,15 @@ const UIManager = {
                 </div>
 
                 <!-- Breakdown TikTok -->
-                <div class="card-premium tiktok-card" style="border: 2px solid #25f4ee; padding: 1.25rem; background: rgba(37, 244, 238, 0.05);">
+                <div style="background: rgba(37, 244, 238, 0.05); border: 2px solid #25f4ee !important; border-radius: 1.25rem; padding: 1.25rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                        <h4 style="font-size:0.7rem; color:#25f4ee; text-transform:uppercase; font-weight:800;">TikTok Ads Performance</h4>
-                        <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#25f4ee;"></ion-icon>
+                        <h4 style="font-size:0.7rem; color:#25f4ee !important; text-transform:uppercase; font-weight:900;">TikTok Ads Performance</h4>
+                        <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#25f4ee !important;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div><small>Inversión</small><b style="font-size:1.1rem; display:block;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
-                        <div><small>Leads</small><b style="font-size:1.1rem; display:block;">${metrics.tiktok?.resultados || '0'}</b></div>
-                        <div><small>CPL</small><b style="font-size:1.1rem; display:block;">$${metrics.tiktok?.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
+                        <div><small style="color:#25f4ee !important; opacity:0.8; display:block; font-size:0.65rem; font-weight:700;">Inversión</small><b style="font-size:1.1rem; color:#25f4ee !important;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
+                        <div><small style="color:#25f4ee !important; opacity:0.8; display:block; font-size:0.65rem; font-weight:700;">Leads</small><b style="font-size:1.1rem; color:#25f4ee !important;">${metrics.tiktok?.resultados || '0'}</b></div>
+                        <div><small style="color:#25f4ee !important; opacity:0.8; display:block; font-size:0.65rem; font-weight:700;">CPL</small><b style="font-size:1.1rem; color:#25f4ee !important;">$${metrics.tiktok?.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
                     </div>
                 </div>
             </div>
@@ -528,16 +528,31 @@ const UIManager = {
                             </div>
 
                             <!-- Bloque TIKTOK ADS -->
-                            <div class="tiktok-bg" style="padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(37, 244, 238, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="padding: 1rem; background: rgba(37, 244, 238, 0.05); border-radius: 0.75rem; border: 2px solid #25f4ee !important; display: flex; flex-direction: column; gap: 0.75rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                                    <span class="tiktok-accent" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">TikTok Ads</span>
-                                    <ion-icon name="logo-tiktok" class="tiktok-accent"></ion-icon>
+                                    <span style="font-size: 0.65rem; font-weight: 800; color: #25f4ee !important; text-transform: uppercase;">TikTok Ads</span>
+                                    <ion-icon name="logo-tiktok" style="color: #25f4ee !important; font-size:1.2rem;"></ion-icon>
                                 </div>
-                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok?.adSpend || 0}"></div>
-                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados || 0}"></div>
-                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}"></div>
-                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" class="premium-input" value="${study.marketing.tiktok?.alcance || 0}"></div>
-                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" class="premium-input" value="${study.marketing.tiktok?.impresiones || 0}"></div>
+                                <div class="input-group small">
+                                    <label style="color: #25f4ee !important; font-weight:700;">Ad Spend ($)</label>
+                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" style="border: 1px solid #25f4ee !important; color: #25f4ee !important; background: rgba(0,0,0,0.2) !important;" class="premium-input" value="${study.marketing.tiktok?.adSpend || 0}">
+                                </div>
+                                <div class="input-group small">
+                                    <label style="color: #25f4ee !important; font-weight:700;">Leads (Resultados)</label>
+                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" style="border: 1px solid #25f4ee !important; color: #25f4ee !important; background: rgba(0,0,0,0.2) !important;" class="premium-input" value="${study.marketing.tiktok?.resultados || 0}">
+                                </div>
+                                <div class="input-group small">
+                                    <label style="color: #25f4ee !important; font-weight:700;">CPL ($)</label>
+                                    <input type="number" readonly style="border: 1px solid #25f4ee !important; color: #25f4ee !important; background: rgba(0,0,0,0.1) !important;" class="premium-input" value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}">
+                                </div>
+                                <div class="input-group small">
+                                    <label style="color: #25f4ee !important; font-weight:700;">Alcance</label>
+                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" style="border: 1px solid #25f4ee !important; color: #25f4ee !important; background: rgba(0,0,0,0.2) !important;" class="premium-input" value="${study.marketing.tiktok?.alcance || 0}">
+                                </div>
+                                <div class="input-group small">
+                                    <label style="color: #25f4ee !important; font-weight:700;">Impresiones</label>
+                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" style="border: 1px solid #25f4ee !important; color: #25f4ee !important; background: rgba(0,0,0,0.2) !important;" class="premium-input" value="${study.marketing.tiktok?.impresiones || 0}">
+                                </div>
                             </div>
                         </div>
 
@@ -607,7 +622,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v10.5.0 [ULTRA-CONTRAST] - Hard Reset Active`);
+        console.log(`Execution Compass v10.6.0 [FORCE-CIAN] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Inject Critical Styles for Mobile/Cache fixes
