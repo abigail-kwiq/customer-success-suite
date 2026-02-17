@@ -202,7 +202,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge" style="background:#25f4ee; color:#000;">v10.4.0 NUCLEO</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge">v10.5.0 ULTRA-CYAN</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -319,15 +319,15 @@ const UIManager = {
                 </div>
 
                 <!-- Breakdown TikTok -->
-                <div class="card-premium" style="border-left: 4px solid #25f4ee; padding: 1.25rem;">
+                <div class="card-premium tiktok-card" style="border: 2px solid #25f4ee; padding: 1.25rem; background: rgba(37, 244, 238, 0.05);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                        <h4 style="font-size:0.7rem; color:#25f4ee; text-transform:uppercase;">TikTok Ads Performance</h4>
+                        <h4 style="font-size:0.7rem; color:#25f4ee; text-transform:uppercase; font-weight:800;">TikTok Ads Performance</h4>
                         <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#25f4ee;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.tiktok?.resultados || '0'}</b></div>
-                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.tiktok?.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
+                        <div><small>Inversión</small><b style="font-size:1.1rem; display:block;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
+                        <div><small>Leads</small><b style="font-size:1.1rem; display:block;">${metrics.tiktok?.resultados || '0'}</b></div>
+                        <div><small>CPL</small><b style="font-size:1.1rem; display:block;">$${metrics.tiktok?.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
                     </div>
                 </div>
             </div>
@@ -607,7 +607,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v10.4.0 [NUCLEO] - Hard Reset Active`);
+        console.log(`Execution Compass v10.5.0 [ULTRA-CONTRAST] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Inject Critical Styles for Mobile/Cache fixes
@@ -615,10 +615,14 @@ const App = {
         style.textContent = `
             .tiktok-accent { color: #25f4ee !important; }
             .tiktok-border { border-color: #25f4ee !important; }
-            .tiktok-bg { background: rgba(37, 244, 238, 0.05) !important; }
+            .tiktok-bg { background: rgba(37, 244, 238, 0.08) !important; border: 2px solid #25f4ee !important; }
+            .tiktok-bg label { color: #25f4ee !important; font-weight: 800 !important; }
+            .tiktok-bg .premium-input { border-color: #25f4ee !important; color: #25f4ee !important; background: rgba(37, 244, 238, 0.1) !important; }
+            .tiktok-card b { color: #25f4ee !important; }
+            .tiktok-card small { color: #25f4ee !important; opacity: 0.9; }
             .version-badge { 
-                background: var(--primary); 
-                color: white; 
+                background: #25f4ee; 
+                color: #000; 
                 padding: 2px 8px; 
                 border-radius: 4px; 
                 font-size: 10px; 
