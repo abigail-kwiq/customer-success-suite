@@ -80,8 +80,7 @@ const DataManager = {
                     tiktok: { impresiones: 0, alcance: 0, resultados: 0, adSpend: 0 }
                 },
                 operacion: { citasAgendadas: 0, citasAtendidas: 0, procedimientos: 0 },
-                ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0, tokensIA: 0 },
-                saas: { mrr: 0, nuevosRegistros: 0, bajas: 0, valorContratos: 0, tipoCampanas: '' }
+                ventas: { ventaTotal: 0, costos: 0, inversion: 0, leadConnector: 0, pauta: 0, tokensIA: 0 }
             };
         }
         return c.estudios[period];
@@ -173,9 +172,8 @@ const FinanceManager = {
             citasAgendadas: study.operacion.citasAgendadas || 0,
             citasAtendidas: study.operacion.citasAtendidas || 0,
             procedimientos: study.operacion.procedimientos || 0,
-            // SaaS Metrics
-            saas: study.saas || { mrr: 0, nuevosRegistros: 0, bajas: 0, valorContratos: 0, tipoCampanas: '' },
-            churnRate: (study.saas && study.saas.mrr > 0 && study.saas.bajas > 0) ? (study.saas.bajas / (study.saas.nuevosRegistros + study.saas.mrr / (study.saas.mrr / study.saas.nuevosRegistros || 1)) * 100) : 0, // Simplified churn
+            assistRate: study.operacion.citasAgendadas > 0 ? (study.operacion.citasAtendidas / study.operacion.citasAgendadas * 100) : 0,
+            cpl: totalResultados > 0 ? (pauta / totalResultados) : 0,
             // Detalle por canal para vistas profundas
             meta, google, tiktok
         };
@@ -206,7 +204,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.3.0 FORCE-SYNC</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.4.0 TOTAL-PURGE</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -216,14 +214,13 @@ const UIManager = {
             case 'marketing': this.renderMarketing(container, curStudy, prevStudy, curMetrics); break;
             case 'operaciones': this.renderOperaciones(container, curStudy, prevStudy, curMetrics); break;
             case 'ventas': this.renderVentas(container, curMetrics, prevMetrics); break;
-            case 'saas': this.renderSaaS(container, curStudy, prevStudy, curMetrics); break;
             case 'config': this.renderConfig(container, client, curStudy); break;
         }
         this.renderContextSelector();
     },
 
     getSectionTitle(id) {
-        const m = { dashboard: 'Compass Dashboard', marketing: 'Análisis Marketing', operaciones: 'Embudo Comercial', ventas: 'Visión Financiera', saas: 'Performance SaaS', config: 'Centro de Control' };
+        const m = { dashboard: 'Compass Dashboard', marketing: 'Análisis Marketing', operaciones: 'Embudo Comercial', ventas: 'Visión Financiera', config: 'Centro de Control' };
         return m[id] || 'Suite';
     },
 
@@ -283,15 +280,7 @@ const UIManager = {
                     ${this.statCard('ROI', (cur.roi * 100).toFixed(1), (prev.roi * 100).toFixed(1), '', false, '%')}
                 </div>
 
-                ${cur.saas && cur.saas.mrr > 0 ? `
-                <h3 style="margin-top: 2rem; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Performance SaaS</h3>
-                <div class="dashboard-grid">
-                    ${this.statCard('MRR', cur.saas.mrr, prev.saas?.mrr || 0, '$')}
-                    ${this.statCard('Churn Rate', cur.churnRate.toFixed(1), 0, '', true, '%')}
-                    ${this.statCard('Nuevos MQLs', cur.saas.nuevosRegistros, prev.saas?.nuevosRegistros || 0)}
-                    ${this.statCard('Valor Contratos', cur.saas.valorContratos, prev.saas?.valorContratos || 0, '$')}
                 </div>
-                ` : ''}
             </div>
         `;
     },
@@ -451,38 +440,6 @@ const UIManager = {
         `;
     },
 
-    renderSaaS(el, cur, prev, metrics) {
-        const prevSaaS = prev ? prev.saas : { mrr: 0, nuevosRegistros: 0, bajas: 0, valorContratos: 0 };
-        el.innerHTML = `
-            <div class="dashboard-grid animate-fade-in" style="margin-bottom: 2rem;">
-                ${this.statCard('Mensual Recurring Revenue (MRR)', cur.saas.mrr, prevSaaS.mrr, '$')}
-                ${this.statCard('Churn Rate', metrics.churnRate.toFixed(1), 0, '', true, '%')}
-                ${this.statCard('Altas (Nuevos)', cur.saas.nuevosRegistros, prevSaaS.nuevosRegistros)}
-                ${this.statCard('Bajas (Churn)', cur.saas.bajas, prevSaaS.bajas, '', true)}
-            </div>
-
-            <div class="animate-fade-in" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-                <div class="card-premium">
-                    <h3 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1.5rem;">Crecimiento de Cartera</h3>
-                    <div style="display:flex; justify-content: space-around; align-items: flex-end; height: 300px; padding: 1rem; background: rgba(0,0,0,0.02); border-radius: 1rem;">
-                        ${this.renderChartBar('Nuevos', cur.saas.nuevosRegistros, Math.max(cur.saas.nuevosRegistros, cur.saas.bajas) * 1.5 || 10, 'var(--accent-green)')}
-                        ${this.renderChartBar('Bajas', cur.saas.bajas, Math.max(cur.saas.nuevosRegistros, cur.saas.bajas) * 1.5 || 10, 'var(--accent-red)')}
-                        ${this.renderChartBar('Neto', cur.saas.nuevosRegistros - cur.saas.bajas, Math.max(cur.saas.nuevosRegistros, cur.saas.bajas) * 1.5 || 10, 'var(--primary)')}
-                    </div>
-                </div>
-                <div class="card-premium" style="display: flex; flex-direction: column; justify-content: center; gap: 2rem;">
-                    <div style="text-align: center;">
-                        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Valor Total Contratos</span>
-                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">$${cur.saas.valorContratos.toLocaleString()}</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Tipo de Campañas Activas</span>
-                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin-top: 0.5rem;">${cur.saas.tipoCampanas || 'No definidas'}</div>
-                    </div>
-                </div>
-            </div>
-        `;
-    },
 
     renderConfig(el, client, study) {
         el.innerHTML = `
@@ -623,36 +580,6 @@ const UIManager = {
                             </div>
                         </div>
 
-                        <!-- Módulo Ventas (Híbrido) -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--accent-green); margin-bottom: 0.5rem;">
-                                <ion-icon name="cash-outline" style="font-size: 1.2rem;"></ion-icon>
-                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Ventas</h4>
-                            </div>
-                            <div class="input-group">
-                                <label style="font-weight: 700;">Venta Total Real ($)</label>
-                                <input type="number" onchange="App.updateStudyField('ventas', 'ventaTotal', this.value)" class="premium-input" style="border-color: var(--accent-green); height: 3.5rem; font-size: 1.2rem;" value="${study.ventas.ventaTotal}">
-                                <p style="margin: 0.5rem 0 0.75rem 0; font-size: 0.65rem; color: var(--text-muted); line-height: 1.4;">
-                                    <b>Manual:</b> Indispensable para laboratorios o casos de precios variables.
-                                </p>
-                            </div>
-                            <div class="input-group">
-                                <label>Gasto Tokens IA (Mes)</label>
-                                <input type="number" onchange="App.updateStudyField('ventas', 'tokensIA', this.value)" class="premium-input" value="${study.ventas.tokensIA || 0}">
-                            </div>
-                        </div>
-
-                        <!-- Módulo SaaS -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-left: 1.5rem; border-left: 1px solid rgba(255,255,255,0.05);">
-                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); margin-bottom: 0.5rem;">
-                                <ion-icon name="rocket-outline" style="font-size: 1.2rem;"></ion-icon>
-                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">SaaS Performance</h4>
-                            </div>
-                            <div class="input-group"><label>MRR ($)</label><input type="number" onchange="App.updateStudyField('saas', 'mrr', this.value)" class="premium-input" value="${study.saas?.mrr || 0}"></div>
-                            <div class="input-group"><label>Nuevos Registros (Altas)</label><input type="number" onchange="App.updateStudyField('saas', 'nuevosRegistros', this.value)" class="premium-input" value="${study.saas?.nuevosRegistros || 0}"></div>
-                            <div class="input-group"><label>Bajas (Churn)</label><input type="number" onchange="App.updateStudyField('saas', 'bajas', this.value)" class="premium-input" value="${study.saas?.bajas || 0}"></div>
-                            <div class="input-group"><label>Valor Total Contratos ($)</label><input type="number" onchange="App.updateStudyField('saas', 'valorContratos', this.value)" class="premium-input" value="${study.saas?.valorContratos || 0}"></div>
-                            <div class="input-group"><label>Tipo de Campañas</label><input type="text" onchange="App.updateStudyField('saas', 'tipoCampanas', this.value)" class="premium-input" value="${study.saas?.tipoCampanas || ''}" placeholder="Ej: Performance, Brand..."></div>
                         </div>
                     </div>
                 </div>
@@ -683,7 +610,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v11.3.0 [FORCE-SYNC] - Hard Reset Active`);
+        console.log(`Execution Compass v11.4.0 [TOTAL-PURGE] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Detección de GHL (Iframe)
