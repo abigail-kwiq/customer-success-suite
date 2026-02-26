@@ -214,7 +214,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.7.0 DEMO-READY</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.8.0 FULL-DEMO</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -620,14 +620,39 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v11.7.0 [DEMO-READY] - Full Data Injected`);
+        console.log(`Execution Compass v11.8.0 [FULL-DEMO] - Syncing...`);
         PersistenceManager.load();
 
-        // Establecer cliente demo por defecto si no hay datos
-        if (Object.keys(state.clients).length <= 1) {
-            state.context.activeClient = 'Clinica Dental Premium';
-            state.context.activePeriod = '2026-01';
-        }
+        // SEMILLA DE DATOS FORZADA: Inyectar si no existe o forzar actualización de Clinic Premium
+        state.clients['Clinica Dental Premium'] = {
+            config: { costos: 45000, inversion: 12000, lc: 2500, tokensIA: 450, valorCita: 1200, valorProcedimiento: 18500 },
+            estudios: {
+                '2026-01': {
+                    marketing: {
+                        meta: { impresiones: 245000, alcance: 128000, resultados: 412, adSpend: 12500 },
+                        google: { impresiones: 110000, alcance: 55000, resultados: 118, adSpend: 8400 },
+                        tiktok: { impresiones: 380000, alcance: 210000, resultados: 625, adSpend: 9800 }
+                    },
+                    operacion: { citasAgendadas: 285, citasAtendidas: 214, procedimientos: 48 },
+                    ventas: { ventaTotal: 1144800, costos: 45000, inversion: 12000, leadConnector: 2500, pauta: 30700, tokensIA: 450 }
+                },
+                '2025-12': {
+                    marketing: {
+                        meta: { impresiones: 210000, alcance: 105000, resultados: 380, adSpend: 11800 },
+                        google: { impresiones: 95000, alcance: 48000, resultados: 95, adSpend: 7200 },
+                        tiktok: { impresiones: 310000, alcance: 180000, resultados: 520, adSpend: 8500 }
+                    },
+                    operacion: { citasAgendadas: 240, citasAtendidas: 185, procedimientos: 36 },
+                    ventas: { ventaTotal: 920000, costos: 42000, inversion: 12000, leadConnector: 2500, pauta: 27500, tokensIA: 400 }
+                }
+            }
+        };
+
+        // Forzar selección del cliente demo para asegurar el impacto visual inmediato
+        state.context.activeClient = 'Clinica Dental Premium';
+        state.context.activePeriod = '2026-01';
+
+        PersistenceManager.save();
 
         // Detección de GHL (Iframe)
         if (window.self !== window.top) {
