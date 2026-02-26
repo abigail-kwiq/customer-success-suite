@@ -19,30 +19,11 @@
     <!-- Tesseract.js for OCR -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
-        /* FIX ATÓMICO TIKTOK v10.7 - NEON MODE */
-        .neon-tiktok-label {
-            color: #25f4ee !important;
-            font-weight: 800 !important;
-            font-size: 0.75rem !important;
-            text-transform: uppercase !important;
-        }
-
-        .neon-tiktok-border {
-            border: 2px solid #25f4ee !important;
-        }
-
-        .neon-tiktok-input {
-            background: rgba(0, 0, 0, 0.3) !important;
-            color: #25f4ee !important;
-            border: 1px solid #25f4ee !important;
-            font-weight: 700 !important;
-        }
-
-        .neon-tiktok-icon {
-            color: #25f4ee !important;
-            font-size: 1.5rem !important;
-        }
-
+        /* FIX SIMÉTRICO TIKTOK v10.8 - SYNC MODE */
+        .neon-tiktok-label { color: #25f4ee !important; font-weight: 700 !important; font-size: 0.7rem !important; text-transform: uppercase !important; }
+        .neon-tiktok-border { border: 1px solid rgba(37, 244, 238, 0.3) !important; }
+        .neon-tiktok-input { background: rgba(15, 23, 42, 0.6) !important; color: #25f4ee !important; border: 1px solid rgba(37, 244, 238, 0.2) !important; font-size: 0.875rem !important; }
+        .neon-tiktok-icon { color: #25f4ee !important; font-size: 1.2rem !important; }
         .version-badge-neon {
             background: #25f4ee !important;
             color: #000 !important;
@@ -73,6 +54,9 @@
             <a href="#" class="nav-item" onclick="showSection('ventas')">
                 <ion-icon name="cash-outline"></ion-icon> Ventas y Finanzas
             </a>
+            <a href="#" class="nav-item" onclick="showSection('saas')">
+                <ion-icon name="rocket-outline"></ion-icon> SaaS
+            </a>
             <a href="#" class="nav-item" onclick="showSection('config')">
                 <ion-icon name="settings-outline"></ion-icon> Conexiones
             </a>
@@ -99,6 +83,9 @@
                     <button class="top-nav-item" onclick="showSection('ventas')">
                         <ion-icon name="cash-outline"></ion-icon> Finanzas
                     </button>
+                    <button class="top-nav-item" onclick="showSection('saas')">
+                        <ion-icon name="rocket-outline"></ion-icon> SaaS
+                    </button>
                     <button class="top-nav-item" onclick="showSection('config')">
                         <ion-icon name="settings-outline"></ion-icon> Conexiones
                     </button>
@@ -115,7 +102,7 @@
         </div>
     </main>
 
-    <script src="core.v10.7.js"></script>
+    <script src="main.v10.8.js"></script>
 </body>
 
 </html>
