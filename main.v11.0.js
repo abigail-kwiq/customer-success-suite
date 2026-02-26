@@ -206,7 +206,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v10.9.0 SYMMETRY-X</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.0.0 TOTAL-UNIFIED</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -334,10 +334,10 @@ const UIManager = {
                 </div>
 
                 <!-- Breakdown TikTok -->
-                <div class="neon-tiktok-border" style="background: rgba(37, 244, 238, 0.05); border-radius: 1.25rem; padding: 1.25rem;">
+                <div class="card-premium" style="border-left: 4px solid #25f4ee; padding: 1.25rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                        <h4 class="neon-tiktok-label">TikTok Ads Performance</h4>
-                        <ion-icon name="logo-tiktok" class="neon-tiktok-icon"></ion-icon>
+                        <h4 style="font-size:0.7rem; color:#25f4ee; text-transform:uppercase;">TikTok Ads Performance</h4>
+                        <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#25f4ee;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
                         <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
@@ -576,10 +576,10 @@ const UIManager = {
                             </div>
 
                             <!-- Bloque TIKTOK ADS -->
-                            <div class="neon-tiktok-border" style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div class="card-premium" style="padding: 1rem; border-left: 4px solid #25f4ee; display: flex; flex-direction: column; gap: 0.75rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                                    <span class="neon-tiktok-label">TikTok Ads</span>
-                                    <ion-icon name="logo-tiktok" class="neon-tiktok-icon" style="font-size:1.2rem;"></ion-icon>
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #25f4ee; text-transform: uppercase;">TikTok Ads</span>
+                                    <ion-icon name="logo-tiktok" style="color: #25f4ee;"></ion-icon>
                                 </div>
                                 <div class="input-group small">
                                     <label>Ad Spend ($)</label>
@@ -683,7 +683,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v10.9.0 [SYMMETRY-X] - Hard Reset Active`);
+        console.log(`Execution Compass v11.0.0 [TOTAL-UNIFIED] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Detección de GHL (Iframe)
