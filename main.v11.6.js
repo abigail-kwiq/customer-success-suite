@@ -204,7 +204,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.5.0 DYNAMIC-CPL</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.6.0 FORCE-CPL</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -610,7 +610,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v11.5.0 [DYNAMIC-CPL] - Hard Reset Active`);
+        console.log(`Execution Compass v11.6.0 [FORCE-CPL] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Detección de GHL (Iframe)
