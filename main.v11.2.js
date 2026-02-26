@@ -206,7 +206,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.1.0 TOTAL-MIRROR</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.2.0 TOTAL-SYNC</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -336,7 +336,7 @@ const UIManager = {
                 <!-- Breakdown TikTok -->
                 <div class="card-premium" style="border-left: 4px solid #25f4ee; padding: 1.25rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                        <h4 style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:none;">TikTok Ads Performance</h4>
+                        <h4 style="font-size:0.75rem; color:#25f4ee; font-weight:700; text-transform:uppercase;">TikTok Ads Performance</h4>
                         <ion-icon name="logo-tiktok" style="font-size:1.5rem; color:#25f4ee;"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
@@ -578,7 +578,7 @@ const UIManager = {
                             <!-- Bloque TIKTOK ADS -->
                             <div style="padding: 1rem; background: rgba(37, 244, 238, 0.05); border-radius: 0.75rem; border: 1px solid rgba(37, 244, 238, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                                    <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">TikTok Ads</span>
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #25f4ee; text-transform: uppercase;">TikTok Ads</span>
                                     <ion-icon name="logo-tiktok" style="color: #25f4ee;"></ion-icon>
                                 </div>
                                 <div class="input-group small">
@@ -683,7 +683,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v11.1.0 [TOTAL-MIRROR] - Hard Reset Active`);
+        console.log(`Execution Compass v11.2.0 [TOTAL-SYNC] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Detección de GHL (Iframe)
