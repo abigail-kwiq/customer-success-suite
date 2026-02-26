@@ -206,7 +206,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v10.8.0 SYNC-MODE</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v10.9.0 SYMMETRY-X</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -340,9 +340,9 @@ const UIManager = {
                         <ion-icon name="logo-tiktok" class="neon-tiktok-icon"></ion-icon>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div><small class="neon-tiktok-label" style="opacity:0.8; font-size:0.6rem;">Inversión</small><b style="font-size:1.1rem; color:#25f4ee;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
-                        <div><small class="neon-tiktok-label" style="opacity:0.8; font-size:0.6rem;">Leads</small><b style="font-size:1.1rem; color:#25f4ee;">${metrics.tiktok?.resultados || '0'}</b></div>
-                        <div><small class="neon-tiktok-label" style="opacity:0.8; font-size:0.6rem;">CPL</small><b style="font-size:1.1rem; color:#25f4ee;">$${metrics.tiktok?.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Inversión</small><b style="font-size:1.1rem;">$${metrics.tiktok?.adSpend.toLocaleString() || '0'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">Leads</small><b style="font-size:1.1rem;">${metrics.tiktok?.resultados || '0'}</b></div>
+                        <div><small style="color:var(--text-muted); display:block;">CPL</small><b style="font-size:1.1rem;">$${metrics.tiktok?.resultados > 0 ? (metrics.tiktok.adSpend / metrics.tiktok.resultados).toFixed(2) : '0.00'}</b></div>
                     </div>
                 </div>
             </div>
@@ -582,24 +582,24 @@ const UIManager = {
                                     <ion-icon name="logo-tiktok" class="neon-tiktok-icon" style="font-size:1.2rem;"></ion-icon>
                                 </div>
                                 <div class="input-group small">
-                                    <label class="neon-tiktok-label">Ad Spend ($)</label>
-                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input neon-tiktok-input" value="${study.marketing.tiktok?.adSpend || 0}">
+                                    <label>Ad Spend ($)</label>
+                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok?.adSpend || 0}">
                                 </div>
                                 <div class="input-group small">
-                                    <label class="neon-tiktok-label">Leads (Resultados)</label>
-                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input neon-tiktok-input" value="${study.marketing.tiktok?.resultados || 0}">
+                                    <label>Leads (Resultados)</label>
+                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados || 0}">
                                 </div>
                                 <div class="input-group small">
-                                    <label class="neon-tiktok-label">CPL ($)</label>
-                                    <input type="number" readonly class="premium-input neon-tiktok-input" style="opacity:0.8;" value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}">
+                                    <label>CPL ($)</label>
+                                    <input type="number" readonly class="premium-input" style="opacity:0.8;" value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}">
                                 </div>
                                 <div class="input-group small">
-                                    <label class="neon-tiktok-label">Alcance</label>
-                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" class="premium-input neon-tiktok-input" value="${study.marketing.tiktok?.alcance || 0}">
+                                    <label>Alcance</label>
+                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" class="premium-input" value="${study.marketing.tiktok?.alcance || 0}">
                                 </div>
                                 <div class="input-group small">
-                                    <label class="neon-tiktok-label">Impresiones</label>
-                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" class="premium-input neon-tiktok-input" value="${study.marketing.tiktok?.impresiones || 0}">
+                                    <label>Impresiones</label>
+                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" class="premium-input" value="${study.marketing.tiktok?.impresiones || 0}">
                                 </div>
                             </div>
                         </div>
@@ -683,7 +683,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v10.8.0 [SYNC-MODE] - Hard Reset Active`);
+        console.log(`Execution Compass v10.9.0 [SYMMETRY-X] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Detección de GHL (Iframe)
