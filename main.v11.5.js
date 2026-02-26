@@ -204,7 +204,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.4.0 TOTAL-PURGE</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.5.0 DYNAMIC-CPL</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -514,7 +514,7 @@ const UIManager = {
                                 </div>
                                 <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'adSpend', this.value)" class="premium-input" value="${study.marketing.meta?.adSpend || 0}"></div>
                                 <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'resultados', this.value)" class="premium-input" value="${study.marketing.meta?.resultados || 0}"></div>
-                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.meta?.resultados > 0 ? (study.marketing.meta.adSpend / study.marketing.meta.resultados).toFixed(2) : 0}"></div>
+                                <div class="input-group small"><label>CPL ($)</label><input type="number" onchange="App.updateCPLField('meta', this.value)" class="premium-input" value="${study.marketing.meta?.resultados > 0 ? (study.marketing.meta.adSpend / study.marketing.meta.resultados).toFixed(2) : 0}"></div>
                                 <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'alcance', this.value)" class="premium-input" value="${study.marketing.meta?.alcance || 0}"></div>
                                 <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'impresiones', this.value)" class="premium-input" value="${study.marketing.meta?.impresiones || 0}"></div>
                             </div>
@@ -527,7 +527,7 @@ const UIManager = {
                                 </div>
                                 <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'adSpend', this.value)" class="premium-input" value="${study.marketing.google?.adSpend || 0}"></div>
                                 <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'resultados', this.value)" class="premium-input" value="${study.marketing.google?.resultados || 0}"></div>
-                                <div class="input-group small"><label>CPL ($)</label><input type="number" class="premium-input" readonly value="${study.marketing.google?.resultados > 0 ? (study.marketing.google.adSpend / study.marketing.google.resultados).toFixed(2) : 0}"></div>
+                                <div class="input-group small"><label>CPL ($)</label><input type="number" onchange="App.updateCPLField('google', this.value)" class="premium-input" value="${study.marketing.google?.resultados > 0 ? (study.marketing.google.adSpend / study.marketing.google.resultados).toFixed(2) : 0}"></div>
                                 <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.google', 'alcance', this.value)" class="premium-input" value="${study.marketing.google?.alcance || 0}"></div>
                                 <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.google', 'impresiones', this.value)" class="premium-input" value="${study.marketing.google?.impresiones || 0}"></div>
                             </div>
@@ -548,7 +548,7 @@ const UIManager = {
                                 </div>
                                 <div class="input-group small">
                                     <label>CPL ($)</label>
-                                    <input type="number" readonly class="premium-input" style="opacity:0.8;" value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}">
+                                    <input type="number" onchange="App.updateCPLField('tiktok', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}">
                                 </div>
                                 <div class="input-group small">
                                     <label>Alcance</label>
@@ -610,7 +610,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v11.4.0 [TOTAL-PURGE] - Hard Reset Active`);
+        console.log(`Execution Compass v11.5.0 [DYNAMIC-CPL] - Hard Reset Active`);
         PersistenceManager.load();
 
         // Detección de GHL (Iframe)
@@ -647,6 +647,22 @@ const App = {
         if (path === 'operacion') {
             s.ventas.ventaTotal = (s.operacion.citasAtendidas * (c.config.valorCita || 0)) +
                 (s.operacion.procedimientos * (c.config.valorProcedimiento || 0));
+        }
+
+        PersistenceManager.save();
+        UIManager.showSection(state.currentSection);
+    },
+    updateCPLField(channel, val) {
+        const study = DataManager.getStudy();
+        const cpl = parseFloat(val) || 0;
+        const channelData = study.marketing[channel];
+
+        if (channelData && cpl > 0) {
+            // Recalcular Resultados (Leads) basados en Ad Spend y el nuevo CPL
+            // Leads = AdSpend / CPL
+            channelData.resultados = Math.round(channelData.adSpend / cpl);
+        } else if (channelData && cpl === 0) {
+            channelData.resultados = 0;
         }
 
         PersistenceManager.save();
