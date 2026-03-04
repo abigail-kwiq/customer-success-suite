@@ -214,7 +214,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.9.0 GHL-PURGE</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v12.0.0 HORIZONTAL-LAYOUT</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -500,87 +500,71 @@ const UIManager = {
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-                        <!-- Módulo Marketing Multi-Canal -->
-                        <div style="display: flex; flex-direction: column; gap: 1.5rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
-                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); margin-bottom: 0.5rem;">
-                                <ion-icon name="megaphone-outline" style="font-size: 1.2rem;"></ion-icon>
-                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Marketing</h4>
-                            </div>
-
-                            <!-- Bloque META ADS -->
-                            <div style="padding: 1rem; background: rgba(24, 119, 242, 0.05); border-radius: 0.75rem; border: 1px solid rgba(24, 119, 242, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                                    <span style="font-size: 0.65rem; font-weight: 700; color: #1877f2; text-transform: uppercase;">Meta Ads</span>
-                                    <ion-icon name="logo-facebook" style="color: #1877f2;"></ion-icon>
-                                </div>
-                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'adSpend', this.value)" class="premium-input" value="${study.marketing.meta?.adSpend || 0}"></div>
-                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'resultados', this.value)" class="premium-input" value="${study.marketing.meta?.resultados || 0}"></div>
-                                <div class="input-group small"><label>CPL ($)</label><input type="number" onchange="App.updateCPLField('meta', this.value)" class="premium-input" value="${study.marketing.meta?.resultados > 0 ? (study.marketing.meta.adSpend / study.marketing.meta.resultados).toFixed(2) : 0}"></div>
-                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'alcance', this.value)" class="premium-input" value="${study.marketing.meta?.alcance || 0}"></div>
-                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'impresiones', this.value)" class="premium-input" value="${study.marketing.meta?.impresiones || 0}"></div>
-                            </div>
-
-                            <!-- Bloque GOOGLE ADS -->
-                            <div style="padding: 1rem; background: rgba(219, 68, 55, 0.05); border-radius: 0.75rem; border: 1px solid rgba(219, 68, 55, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                                    <span style="font-size: 0.65rem; font-weight: 700; color: #db4437; text-transform: uppercase;">Google Ads</span>
-                                    <ion-icon name="logo-google" style="color: #db4437;"></ion-icon>
-                                </div>
-                                <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'adSpend', this.value)" class="premium-input" value="${study.marketing.google?.adSpend || 0}"></div>
-                                <div class="input-group small"><label>Leads (Resultados)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'resultados', this.value)" class="premium-input" value="${study.marketing.google?.resultados || 0}"></div>
-                                <div class="input-group small"><label>CPL ($)</label><input type="number" onchange="App.updateCPLField('google', this.value)" class="premium-input" value="${study.marketing.google?.resultados > 0 ? (study.marketing.google.adSpend / study.marketing.google.resultados).toFixed(2) : 0}"></div>
-                                <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.google', 'alcance', this.value)" class="premium-input" value="${study.marketing.google?.alcance || 0}"></div>
-                                <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.google', 'impresiones', this.value)" class="premium-input" value="${study.marketing.google?.impresiones || 0}"></div>
-                            </div>
-
-                            <!-- Bloque TIKTOK ADS -->
-                            <div style="padding: 1rem; background: rgba(37, 244, 238, 0.05); border-radius: 0.75rem; border: 1px solid rgba(37, 244, 238, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                                    <span style="font-size: 0.65rem; font-weight: 700; color: #25f4ee !important; text-transform: uppercase !important;">TIKTOK ADS</span>
-                                    <ion-icon name="logo-tiktok" style="color: #25f4ee !important;"></ion-icon>
-                                </div>
-                                <div class="input-group small">
-                                    <label>Ad Spend ($)</label>
-                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok?.adSpend || 0}">
-                                </div>
-                                <div class="input-group small">
-                                    <label>Leads (Resultados)</label>
-                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados || 0}">
-                                </div>
-                                <div class="input-group small">
-                                    <label>CPL ($)</label>
-                                    <input type="number" onchange="App.updateCPLField('tiktok', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}">
-                                </div>
-                                <div class="input-group small">
-                                    <label>Alcance</label>
-                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" class="premium-input" value="${study.marketing.tiktok?.alcance || 0}">
-                                </div>
-                                <div class="input-group small">
-                                    <label>Impresiones</label>
-                                    <input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" class="premium-input" value="${study.marketing.tiktok?.impresiones || 0}">
-                                </div>
-                            </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+                        <!-- Headers de Agrupación -->
+                        <div style="grid-column: span 3; display:flex; align-items:center; gap:0.5rem; color:var(--primary); padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <ion-icon name="megaphone-outline" style="font-size: 1.2rem;"></ion-icon>
+                            <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Canales de Marketing</h4>
+                        </div>
+                        <div style="grid-column: span 1; display:flex; align-items:center; gap:0.5rem; color:#4338ca; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <ion-icon name="calendar-outline" style="font-size: 1.2rem;"></ion-icon>
+                            <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Operativa</h4>
                         </div>
 
-                        <!-- Módulo Operativa -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-right: 1.5rem; border-right: 1px solid rgba(255,255,255,0.05);">
-                            <div style="display:flex; align-items:center; gap:0.5rem; color:#4338ca; margin-bottom: 0.5rem;">
-                                <ion-icon name="calendar-outline" style="font-size: 1.2rem;"></ion-icon>
-                                <h4 style="margin:0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Operativa</h4>
+                        <!-- Bloque META ADS -->
+                        <div style="padding: 1rem; background: rgba(24, 119, 242, 0.05); border-radius: 0.75rem; border: 1px solid rgba(24, 119, 242, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #1877f2; text-transform: uppercase;">Meta Ads</span>
+                                <ion-icon name="logo-facebook" style="color: #1877f2;"></ion-icon>
                             </div>
+                            <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'adSpend', this.value)" class="premium-input" value="${study.marketing.meta?.adSpend || 0}"></div>
+                            <div class="input-group small"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'resultados', this.value)" class="premium-input" value="${study.marketing.meta?.resultados || 0}"></div>
+                            <div class="input-group small"><label>CPL ($)</label><input type="number" onchange="App.updateCPLField('meta', this.value)" class="premium-input" value="${study.marketing.meta?.resultados > 0 ? (study.marketing.meta.adSpend / study.marketing.meta.resultados).toFixed(2) : 0}"></div>
+                            <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'alcance', this.value)" class="premium-input" value="${study.marketing.meta?.alcance || 0}"></div>
+                            <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.meta', 'impresiones', this.value)" class="premium-input" value="${study.marketing.meta?.impresiones || 0}"></div>
+                        </div>
+
+                        <!-- Bloque GOOGLE ADS -->
+                        <div style="padding: 1rem; background: rgba(219, 68, 55, 0.05); border-radius: 0.75rem; border: 1px solid rgba(219, 68, 55, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #db4437; text-transform: uppercase;">Google Ads</span>
+                                <ion-icon name="logo-google" style="color: #db4437;"></ion-icon>
+                            </div>
+                            <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.google', 'adSpend', this.value)" class="premium-input" value="${study.marketing.google?.adSpend || 0}"></div>
+                            <div class="input-group small"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing.google', 'resultados', this.value)" class="premium-input" value="${study.marketing.google?.resultados || 0}"></div>
+                            <div class="input-group small"><label>CPL ($)</label><input type="number" onchange="App.updateCPLField('google', this.value)" class="premium-input" value="${study.marketing.google?.resultados > 0 ? (study.marketing.google.adSpend / study.marketing.google.resultados).toFixed(2) : 0}"></div>
+                            <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.google', 'alcance', this.value)" class="premium-input" value="${study.marketing.google?.alcance || 0}"></div>
+                            <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.google', 'impresiones', this.value)" class="premium-input" value="${study.marketing.google?.impresiones || 0}"></div>
+                        </div>
+
+                        <!-- Bloque TIKTOK ADS -->
+                        <div style="padding: 1rem; background: rgba(37, 244, 238, 0.05); border-radius: 0.75rem; border: 1px solid rgba(37, 244, 238, 0.15); display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #25f4ee !important; text-transform: uppercase !important;">TIKTOK ADS</span>
+                                <ion-icon name="logo-tiktok" style="color: #25f4ee !important;"></ion-icon>
+                            </div>
+                            <div class="input-group small"><label>Ad Spend ($)</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'adSpend', this.value)" class="premium-input" value="${study.marketing.tiktok?.adSpend || 0}"></div>
+                            <div class="input-group small"><label>Leads</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'resultados', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados || 0}"></div>
+                            <div class="input-group small"><label>CPL ($)</label><input type="number" onchange="App.updateCPLField('tiktok', this.value)" class="premium-input" value="${study.marketing.tiktok?.resultados > 0 ? (study.marketing.tiktok.adSpend / study.marketing.tiktok.resultados).toFixed(2) : 0}"></div>
+                            <div class="input-group small"><label>Alcance</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'alcance', this.value)" class="premium-input" value="${study.marketing.tiktok?.alcance || 0}"></div>
+                            <div class="input-group small"><label>Impresiones</label><input type="number" onchange="App.updateStudyField('marketing.tiktok', 'impresiones', this.value)" class="premium-input" value="${study.marketing.tiktok?.impresiones || 0}"></div>
+                        </div>
+
+                        <!-- Bloque OPERATIVA -->
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                             <div class="input-group"><label>Agendadas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAgendadas', this.value)" class="premium-input" value="${study.operacion.citasAgendadas}"></div>
                             <div class="input-group"><label>Atendidas</label><input type="number" onchange="App.updateStudyField('operacion', 'citasAtendidas', this.value)" class="premium-input" value="${study.operacion.citasAtendidas}"></div>
                             <div class="input-group"><label>Procedimientos</label><input type="number" onchange="App.updateStudyField('operacion', 'procedimientos', this.value)" class="premium-input" value="${study.operacion.procedimientos}"></div>
                             
-                            <div style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(99, 102, 241, 0.03); border-radius: 1rem; border: 1px solid rgba(99, 102, 241, 0.05);">
+                            <div style="margin-top: 1rem; padding: 1.25rem; background: rgba(99, 102, 241, 0.03); border-radius: 1rem; border: 1px solid rgba(99, 102, 241, 0.05);">
                                 <h5 style="margin: 0 0 0.5rem 0; font-size: 0.65rem; text-transform: uppercase; color: var(--primary);">Ratio Eficiencia</h5>
                                 <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">
                                     $${((study.operacion.citasAtendidas * (client.config.valorCita || 0)) + (study.operacion.procedimientos * (client.config.valorProcedimiento || 0))).toLocaleString()}
                                 </div>
-                                <p style="margin: 0.5rem 0 0 0; font-size: 0.6rem; color: var(--text-muted);">Proyectado según KPIs operativos.</p>
+                                <p style="margin: 0.5rem 0 0 0; font-size: 0.55rem; color: var(--text-muted);">Proyectado según KPIs operativos.</p>
                             </div>
                         </div>
+                    </div>
 
                         </div>
                     </div>
@@ -612,7 +596,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v11.9.0 [GHL-PURGE] - Cleaning...`);
+        console.log(`Execution Compass v12.0.0 [HORIZONTAL-LAYOUT] - Optimizing space...`);
         PersistenceManager.load();
 
         // SEMILLA DE DATOS FORZADA: Inyectar si no existe o forzar actualización de Clinic Premium
