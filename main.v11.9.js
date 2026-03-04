@@ -214,7 +214,7 @@ const UIManager = {
 
         document.getElementById('view-title').innerText = this.getSectionTitle(id);
         const subtitle = document.getElementById('view-subtitle');
-        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.8.0 FULL-DEMO</span>`;
+        subtitle.innerHTML = `${state.context.activeClient} • ${state.context.activePeriod} <span class="version-badge-neon">v11.9.0 GHL-PURGE</span>`;
 
         const container = document.getElementById('content-area');
         container.innerHTML = ''; // Force Clean
@@ -475,14 +475,6 @@ const UIManager = {
                             </div>
 
                             <button onclick="App.saveClientConfig()" class="btn-premium" style="padding: 0.75rem;">Actualizar Identidad</button>
-                            
-                            <hr style="opacity: 0.05; margin: 0.5rem 0;">
-                            
-                            <div class="input-group">
-                                <label>GHL API Key (Beta)</label>
-                                <input type="password" id="ghl-key" class="premium-input" placeholder="••••••••" value="${client.config.ghlKey || ''}">
-                            </div>
-                            <button onclick="App.testGHLConnection()" class="btn-secondary" style="font-size: 0.75rem;">Vincular GoHighLevel</button>
                         </div>
                     </div>
                     
@@ -620,7 +612,7 @@ const UIManager = {
 // --- 6. CONTROLLER ---
 const App = {
     init() {
-        console.log(`Execution Compass v11.8.0 [FULL-DEMO] - Syncing...`);
+        console.log(`Execution Compass v11.9.0 [GHL-PURGE] - Cleaning...`);
         PersistenceManager.load();
 
         // SEMILLA DE DATOS FORZADA: Inyectar si no existe o forzar actualización de Clinic Premium
@@ -709,17 +701,6 @@ const App = {
         PersistenceManager.save();
         UIManager.showSection(state.currentSection);
     },
-    testGHLConnection() {
-        const key = document.getElementById('ghl-key').value;
-        if (!key) return UIState.showNotification('Por favor ingrese una API Key', 'error');
-
-        UIState.showNotification('Conectando con GoHighLevel...', 'info');
-        // Placeholder para integración real de API
-        setTimeout(() => {
-            DataManager.updateClientConfig({ ghlKey: key });
-            UIState.showNotification('Conexión con GHL exitosa (Beta)', 'success');
-        }, 1500);
-    },
 
     setLoadingSource(source) {
         UIState.showNotification(`Modo de carga: ${source.toUpperCase()}`, 'info');
@@ -733,8 +714,7 @@ const App = {
             lc: parseFloat(document.getElementById('cfg-lc').value) || 0,
             tokensIA: parseFloat(document.getElementById('cfg-tokens').value) || 0,
             valorCita: parseFloat(document.getElementById('cfg-cita').value) || 0,
-            valorProcedimiento: parseFloat(document.getElementById('cfg-proc').value) || 0,
-            ghlKey: document.getElementById('ghl-key').value
+            valorProcedimiento: parseFloat(document.getElementById('cfg-proc').value) || 0
         };
         DataManager.updateClientConfig(updates);
         PersistenceManager.save();
